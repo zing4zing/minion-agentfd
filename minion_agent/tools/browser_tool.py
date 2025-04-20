@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 
 from smolagents import tool
 
-MAX_LENGTH = 2000
+MAX_LENGTH = 128_000
 
 # Valid browser actions
 VALID_ACTIONS = {

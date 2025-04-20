@@ -38,6 +38,7 @@ agent_config = AgentConfig(
                 },  # Will use OPENAI_API_KEY from environment
     #tools=["minion_agent.tools.web_browsing.search_web"],
     tools=[
+        #"minion_agent.tools.web_browsing.search_web","minion_agent.tools.web_browsing.visit_webpage",
         "minion_agent.tools.browser_tool.browser",
         MCPTool(
                     command="npx",
@@ -70,9 +71,9 @@ async def main():
         
         # Run the agent with a question
         #result = await agent.run("search sam altman and export summary as markdown")
-        result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
+        #result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
         
-        #result = await agent.run("go visit https://www.baidu.com and clone it")
+        result = await agent.run("go visit https://www.baidu.com and clone it")
         #result = await agent.run("实现一个贪吃蛇游戏")
         print("Agent's response:", result)
     except Exception as e:

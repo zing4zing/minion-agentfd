@@ -87,17 +87,17 @@ class SmolagentsMCPServerStdio(MCPServerBase):
             logger.info(f"Tools available: {tools}")
             self.tools = tools
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Exit the context manager."""
-        if self.context:
-            try:
-                self.context.__exit__(exc_type, exc_val, exc_tb)
-                logger.info("MCP server context closed successfully")
-            except Exception as e:
-                logger.error(f"Error closing MCP server context: {e}")
-            finally:
-                self.context = None
-                self.tool_collection = None
+    # def __exit__(self, exc_type, exc_val, exc_tb):
+    #     """Exit the context manager."""
+    #     if self.context:
+    #         try:
+    #             self.context.__exit__(exc_type, exc_val, exc_tb)
+    #             logger.info("MCP server context closed successfully")
+    #         except Exception as e:
+    #             logger.error(f"Error closing MCP server context: {e}")
+    #         finally:
+    #             self.context = None
+    #             self.tool_collection = None
 
     async def cleanup(self):
         """Clean up resources."""
