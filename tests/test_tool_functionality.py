@@ -14,7 +14,7 @@ import pytest
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-# Add parent directory to path to import from minion_manus
+# Add parent directory to path to import from minion_agent
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 

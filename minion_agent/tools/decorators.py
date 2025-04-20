@@ -7,8 +7,8 @@ import functools
 import logging
 from typing import Any, Callable, Dict, Optional, Type, Union, get_type_hints
 
-from minion_manus.tools.base import BaseTool
-from minion_manus.tools.tool_adapter import SmolTool, MCPTool, registry
+from minion_agent.tools.base import BaseTool
+from minion_agent.tools.tool_adapter import SmolTool, MCPTool, registry
 
 # 设置日志
 logger = logging.getLogger(__name__)

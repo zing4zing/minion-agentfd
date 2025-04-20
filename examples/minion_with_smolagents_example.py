@@ -13,7 +13,7 @@ import sys
 import logging
 from typing import Dict, Any, List
 
-# Add parent directory to path to import from minion_manus
+# Add parent directory to path to import from minion_agent
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Set up logging
@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Import the adapter first
-from minion_manus.providers.adapters import MinionProviderToSmolAdapter
+from minion_agent.providers.adapters import MinionProviderToSmolAdapter
 
 # Import SmolaAgents components
 try:

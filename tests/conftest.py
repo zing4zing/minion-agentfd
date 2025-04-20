@@ -16,7 +16,7 @@ To run tests with specific markers:
     pytest -m "asyncio"
 
 To generate test coverage report:
-    pytest --cov=minion_manus
+    pytest --cov=minion_agent
 """
 
 import os
@@ -24,7 +24,7 @@ import sys
 import pytest
 from unittest import mock
 
-# Add parent directory to path to import from minion_manus
+# Add parent directory to path to import from minion_agent
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 

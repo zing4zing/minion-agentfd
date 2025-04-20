@@ -17,7 +17,7 @@ from minion_agent import MinionAgent, AgentConfig
 
 # Configure the agent
 agent_config = AgentConfig(
-    model_id="gpt-4",  # or your preferred model
+    model_id="gpt-4o",  # or your preferred model
     name="Research Assistant",
     description="A helpful research assistant",
     instructions="You are a helpful research assistant that can search the web and visit webpages.",
@@ -31,6 +31,8 @@ agent = MinionAgent(agent_config)
 result = agent.run("What are the latest developments in AI?")
 print("Agent's response:", result)
 ```
+
+see example.py 
 
 ## Configuration
 

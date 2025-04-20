@@ -5,7 +5,7 @@ import os
 from loguru import logger
 from textwrap import dedent
 
-from minion_manus.config import MCPTool
+from minion_agent.config import MCPTool
 
 try:
     from mcp import ClientSession, StdioServerParameters
@@ -36,6 +36,10 @@ class MCPServerBase(ABC):
         """Set up tools. To be implemented by subclasses."""
         pass
 
+    async def cleanup(self):
+        """Clean up resources. To be implemented by subclasses if needed."""
+        pass
+
 
 class SmolagentsMCPServerStdio(MCPServerBase):
     """Implementation of MCP tools manager for smolagents."""
@@ -55,8 +59,10 @@ class SmolagentsMCPServerStdio(MCPServerBase):
         )
 
         # Store the context manager itself
+        import inspect
         self.context = ToolCollection.from_mcp(
-            self.server_parameters, trust_remote_code=True
+            self.server_parameters,
+            trust_remote_code=True
         )
         # Enter the context
         self.tool_collection = self.context.__enter__()
@@ -80,6 +86,23 @@ class SmolagentsMCPServerStdio(MCPServerBase):
             )
             logger.info(f"Tools available: {tools}")
             self.tools = tools
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the context manager."""
+        if self.context:
+            try:
+                self.context.__exit__(exc_type, exc_val, exc_tb)
+                logger.info("MCP server context closed successfully")
+            except Exception as e:
+                logger.error(f"Error closing MCP server context: {e}")
+            finally:
+                self.context = None
+                self.tool_collection = None
+
+    async def cleanup(self):
+        """Clean up resources."""
+        # if self.context:
+        #     self.__exit__(None, None, None)
 
 
 class OpenAIMCPServerStdio(MCPServerBase):

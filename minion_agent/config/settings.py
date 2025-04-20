@@ -52,23 +52,23 @@ class BrowserSettings(BaseModel):
     """Browser settings."""
     
     headless: bool = Field(
-        default=os.getenv("MINION_MANUS_BROWSER_HEADLESS", "False").lower() == "true",
+        default=os.getenv("minion_agent_BROWSER_HEADLESS", "False").lower() == "true",
         description="Whether to run the browser in headless mode.",
     )
     width: int = Field(
-        default=int(os.getenv("MINION_MANUS_BROWSER_WIDTH", "1280")),
+        default=int(os.getenv("minion_agent_BROWSER_WIDTH", "1280")),
         description="Browser window width.",
     )
     height: int = Field(
-        default=int(os.getenv("MINION_MANUS_BROWSER_HEIGHT", "800")),
+        default=int(os.getenv("minion_agent_BROWSER_HEIGHT", "800")),
         description="Browser window height.",
     )
     user_agent: Optional[str] = Field(
-        default=os.getenv("MINION_MANUS_BROWSER_USER_AGENT"),
+        default=os.getenv("minion_agent_BROWSER_USER_AGENT"),
         description="Browser user agent.",
     )
     timeout: int = Field(
-        default=int(os.getenv("MINION_MANUS_BROWSER_TIMEOUT", "30000")),
+        default=int(os.getenv("minion_agent_BROWSER_TIMEOUT", "30000")),
         description="Browser timeout in milliseconds.",
     )
 
@@ -77,18 +77,18 @@ class LoggingSettings(BaseModel):
     """Logging settings."""
     
     level: str = Field(
-        default=os.getenv("MINION_MANUS_LOG_LEVEL", "INFO"),
+        default=os.getenv("minion_agent_LOG_LEVEL", "INFO"),
         description="Logging level.",
     )
     format: str = Field(
         default=os.getenv(
-            "MINION_MANUS_LOG_FORMAT",
+            "minion_agent_LOG_FORMAT",
             "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
         ),
         description="Logging format.",
     )
     file: Optional[str] = Field(
-        default=os.getenv("MINION_MANUS_LOG_FILE"),
+        default=os.getenv("minion_agent_LOG_FILE"),
         description="Log file path.",
     )
 

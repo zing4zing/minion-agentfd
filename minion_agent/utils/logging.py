@@ -9,7 +9,7 @@ from typing import Optional
 
 from loguru import logger
 
-from minion_manus.config import Settings
+from minion_agent.config import Settings
 
 
 def setup_logging(settings: Optional[Settings] = None) -> None:

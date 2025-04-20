@@ -15,10 +15,10 @@ import pytest
 from unittest import mock
 from typing import List, Dict, Any, Optional
 
-# Add parent directory to path to import from minion_manus
+# Add parent directory to path to import from minion_agent
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from minion_manus.providers.adapters import MinionProviderToSmolAdapter
+from minion_agent.providers.adapters import MinionProviderToSmolAdapter
 
 
 def test_create_adapter_from_model_name(patch_basic_modules, mock_providers):

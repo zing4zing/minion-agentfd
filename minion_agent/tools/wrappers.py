@@ -2,9 +2,9 @@ import inspect
 import importlib
 from collections.abc import Callable
 
-from minion_manus.config import AgentFramework, MCPTool
+from minion_agent.config import AgentFramework, MCPTool
 
-from minion_manus.tools.mcp import (
+from minion_agent.tools.mcp import (
     GoogleMCPServerStdio,
     LlamaIndexMCPServerStdio,
     SmolagentsMCPServerStdio,

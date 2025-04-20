@@ -1,7 +1,7 @@
 from typing import Any, Optional, List
 from abc import ABC, abstractmethod
 import asyncio
-from minion_manus.config import AgentFramework, AgentConfig
+from minion_agent.config import AgentFramework, AgentConfig
 
 
 class MinionAgent(ABC):
@@ -12,27 +12,27 @@ class MinionAgent(ABC):
 
     # factory method
     @classmethod
-    def create(
+    async def create(
         cls,
         agent_framework: AgentFramework,
         agent_config: AgentConfig,
         managed_agents: Optional[list[AgentConfig]] = None,
     ) -> "AnyAgent":
         if agent_framework == AgentFramework.SMOLAGENTS:
-            from minion_manus.frameworks.smolagents import SmolagentsAgent as Agent
+            from minion_agent.frameworks.smolagents import SmolagentsAgent as Agent
         elif agent_framework == AgentFramework.LANGCHAIN:
-            from minion_manus.frameworks.langchain import LangchainAgent as Agent
+            from minion_agent.frameworks.langchain import LangchainAgent as Agent
         elif agent_framework == AgentFramework.OPENAI:
-            from minion_manus.frameworks.openai import OpenAIAgent as Agent
+            from minion_agent.frameworks.openai import OpenAIAgent as Agent
         elif agent_framework == AgentFramework.LLAMAINDEX:
-            from minion_manus.frameworks.llama_index import LlamaIndexAgent as Agent
+            from minion_agent.frameworks.llama_index import LlamaIndexAgent as Agent
         elif agent_framework == AgentFramework.GOOGLE:
-            from minion_manus.frameworks.google import GoogleAgent as Agent
-
+            from minion_agent.frameworks.google import GoogleAgent as Agent
         else:
             raise ValueError(f"Unsupported agent framework: {agent_framework}")
+            
         agent = Agent(agent_config, managed_agents=managed_agents)
-        asyncio.get_event_loop().run_until_complete(agent._load_agent())
+        await agent._load_agent()
         return agent
 
     @abstractmethod
@@ -40,9 +40,9 @@ class MinionAgent(ABC):
         """Load the agent instance."""
         pass
 
-    def run(self, prompt: str) -> Any:
+    async def run(self, prompt: str) -> Any:
         """Run the agent with the given prompt."""
-        return asyncio.get_event_loop().run_until_complete(self.run_async(prompt))
+        return await self.run_async(prompt)
 
     @abstractmethod
     async def run_async(self, prompt: str) -> Any:

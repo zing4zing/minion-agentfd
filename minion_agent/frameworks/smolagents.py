@@ -2,6 +2,8 @@
 
 import os
 from typing import Optional, Any, List
+import asyncio
+from functools import wraps
 
 from .minion_agent import MinionAgent
 from .. import AgentFramework
@@ -19,6 +21,14 @@ from ..config import AgentConfig
 DEFAULT_AGENT_TYPE = "CodeAgent"
 DEFAULT_MODEL_CLASS = "LiteLLMModel"
 
+def get_or_create_eventloop():
+    """Get the current event loop or create a new one if necessary."""
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
 
 class SmolagentsAgent(MinionAgent):
     """Smolagents agent implementation that handles both loading and running."""
@@ -63,8 +73,8 @@ class SmolagentsAgent(MinionAgent):
 
         if not self.managed_agents and not self.config.tools:
             self.config.tools = [
-                "minion_manus.tools.search_web",
-                "minion_manus.tools.visit_webpage",
+                "minion_agent.tools.search_web",
+                "minion_agent.tools.visit_webpage",
             ]
 
         tools, mcp_servers = await import_and_wrap_tools(
@@ -116,8 +126,40 @@ class SmolagentsAgent(MinionAgent):
 
     async def run_async(self, prompt: str) -> Any:
         """Run the Smolagents agent with the given prompt."""
-        result = self._agent.run(prompt)
-        return result
+        try:
+            result = self._agent.run(prompt)
+            return result
+        finally:
+            # Ensure cleanup happens after the run
+            await self.cleanup()
+
+    async def cleanup(self):
+        """Clean up resources properly."""
+        if self._mcp_servers:
+            for server in self._mcp_servers:
+                try:
+                    if hasattr(server, 'cleanup'):
+                        await server.cleanup()
+                    elif hasattr(server, 'close'):
+                        if hasattr(server, '_connection'):
+                            await server._connection.close()
+                        if hasattr(server, '_process'):
+                            server._process.terminate()
+                except Exception as e:
+                    print(f"Error during server cleanup: {e}")
+
+        if self._managed_mcp_servers:
+            for server in self._managed_mcp_servers:
+                try:
+                    if hasattr(server, 'cleanup'):
+                        await server.cleanup()
+                    elif hasattr(server, 'close'):
+                        if hasattr(server, '_connection'):
+                            await server._connection.close()
+                        if hasattr(server, '_process'):
+                            server._process.terminate()
+                except Exception as e:
+                    print(f"Error during managed server cleanup: {e}")
 
     @property
     def tools(self) -> List[str]:
@@ -125,4 +167,4 @@ class SmolagentsAgent(MinionAgent):
         Return the tools used by the agent.
         This property is read-only and cannot be modified.
         """
-        return self._agent.tools
+        return self._agent.tools if self._agent else []

@@ -129,7 +129,7 @@ class SmolaAgentsAdapter(BaseAdapter):
         """
         try:
             from smolagents.tools import Tool as SmolaAgentsTool
-            from minion_manus.tools.tool import Tool
+            from minion_agent.tools.tool import Tool
         except ImportError as e:
             if "smolagents" in str(e):
                 raise ImportError("SmolaAgents is required for this adapter. Install with `pip install smolagents`.")
