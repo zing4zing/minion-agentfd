@@ -18,10 +18,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Try to apply nest_asyncio to handle event loop conflicts in sync mode
-try:
-    nest_asyncio.apply()
-except Exception:
-    pass
+# try:
+#     nest_asyncio.apply()
+# except Exception:
+#     pass
 
 
 class BaseSmolaAgentsModelAdapter:

@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 import os
 from PIL import Image
 from io import BytesIO
-import asyncio
 from time import sleep
 
 from minion_agent.config import MCPTool
@@ -25,17 +24,18 @@ from smolagents import (
 
 # Set up screenshot callback for Playwright
 def save_screenshot(memory_step: ActionStep, agent: CodeAgent) -> None:
-
-    # Get the browser process
-    browser_process = agent.tools.get("browser")
-    if browser_process:
+    sleep(1.0)  # Let JavaScript animations happen before taking the screenshot
+    
+    # Get the browser tool
+    browser_tool = agent.tools.get("browser")
+    if browser_tool:
         # Clean up old screenshots to save memory
         for previous_memory_step in agent.memory.steps:
             if isinstance(previous_memory_step, ActionStep) and previous_memory_step.step_number <= memory_step.step_number - 2:
                 previous_memory_step.observations_images = None
         
         # Take screenshot using Playwright
-        result = browser_process.execute(action="screenshot")
+        result = browser_tool(action="screenshot")
         if result["success"] and "screenshot" in result.get("data", {}):
             # Convert bytes to PIL Image
             screenshot_bytes = result["data"]["screenshot"]
@@ -44,7 +44,7 @@ def save_screenshot(memory_step: ActionStep, agent: CodeAgent) -> None:
             memory_step.observations_images = [image.copy()]  # Create a copy to ensure it persists
         
         # Get current URL
-        state_result = browser_process.execute(action="get_current_state")
+        state_result = browser_tool(action="get_current_state")
         if state_result["success"] and "url" in state_result.get("data", {}):
             url_info = f"Current url: {state_result['data']['url']}"
             memory_step.observations = (
@@ -69,7 +69,9 @@ agent_config = AgentConfig(
     ],
     agent_type="CodeAgent",
     model_type="AzureOpenAIServerModel",
-    agent_args={"additional_authorized_imports":"*", "step_callbacks":[save_screenshot]}
+    agent_args={"additional_authorized_imports":"*",
+                #"step_callbacks":[save_screenshot]
+                }
 )
 
 # from opentelemetry.sdk.trace import TracerProvider
@@ -92,8 +94,9 @@ async def main():
         # Run the agent with a question
         #result = await agent.run("search sam altman and export summary as markdown")
         #result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
-        
-        result = await agent.run("go visit https://www.baidu.com and clone it")
+        result = await agent.run("搜索最新的人工智能发展趋势，并且总结为markdown")
+        #result = await agent.run("go visit https://www.baidu.com and clone it")
+        #result = await agent.run("go visit https://www.baidu.com , take a screenshot and clone it")
         #result = await agent.run("实现一个贪吃蛇游戏")
         print("Agent's response:", result)
     except Exception as e:
