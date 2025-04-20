@@ -22,7 +22,7 @@ class MCPServerBase(ABC):
     def __init__(self, mcp_tool: MCPTool):
         if not mcp_available:
             raise ImportError(
-                "You need to `pip install 'any-agent[mcp]'` to use MCP tools."
+                "You need to `pip install 'minion-agent[mcp]'` to use MCP tools."
             )
 
         # Store the original tool configuration
@@ -62,7 +62,7 @@ class SmolagentsMCPServerStdio(MCPServerBase):
         import inspect
         self.context = ToolCollection.from_mcp(
             self.server_parameters,
-            trust_remote_code=True
+            # trust_remote_code=True
         )
         # Enter the context
         self.tool_collection = self.context.__enter__()
