@@ -41,4 +41,4 @@ profile = "black"
 multi_line_output = 3
 
 [tool.hatch.build.targets.wheel]
-packages = ["minion_agent"] 
+packages = ["minion_agent"]

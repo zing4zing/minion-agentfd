@@ -62,7 +62,7 @@ class SmolagentsMCPServerStdio(MCPServerBase):
         import inspect
         self.context = ToolCollection.from_mcp(
             self.server_parameters,
-            # trust_remote_code=True
+            trust_remote_code=True
         )
         # Enter the context
         self.tool_collection = self.context.__enter__()
