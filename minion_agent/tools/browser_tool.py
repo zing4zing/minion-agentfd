@@ -232,7 +232,7 @@ def get_browser_process():
         _browser_process = BrowserProcess()
     return _browser_process
 
-@tool
+#@tool
 def browser(
     action: str,
     url: Optional[str] = None,

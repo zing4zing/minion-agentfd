@@ -3,6 +3,10 @@
 import asyncio
 from dotenv import load_dotenv
 import os
+from PIL import Image
+from io import BytesIO
+import asyncio
+from time import sleep
 
 from minion_agent.config import MCPTool
 
@@ -16,40 +20,56 @@ from smolagents import (
     ToolCallingAgent,
     DuckDuckGoSearchTool,
     VisitWebpageTool,
-    HfApiModel, AzureOpenAIServerModel,
+    HfApiModel, AzureOpenAIServerModel, ActionStep,
 )
 
-# 配置 Azure OpenAI 模型
-# model = AzureOpenAIServerModel(
-#     model_id=os.environ.get("AZURE_OPENAI_MODEL"),          # 例如 "gpt-4" 或 "gpt-35-turbo"
-#     azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),  # Azure OpenAI 服务端点
-#     api_key=os.environ.get("AZURE_OPENAI_API_KEY"),         # Azure OpenAI API 密钥
-#     api_version=os.environ.get("OPENAI_API_VERSION")        # API 版本，例如 "2024-02-15-preview"
-# )
+# Set up screenshot callback for Playwright
+def save_screenshot(memory_step: ActionStep, agent: CodeAgent) -> None:
+
+    # Get the browser process
+    browser_process = agent.tools.get("browser")
+    if browser_process:
+        # Clean up old screenshots to save memory
+        for previous_memory_step in agent.memory.steps:
+            if isinstance(previous_memory_step, ActionStep) and previous_memory_step.step_number <= memory_step.step_number - 2:
+                previous_memory_step.observations_images = None
+        
+        # Take screenshot using Playwright
+        result = browser_process.execute(action="screenshot")
+        if result["success"] and "screenshot" in result.get("data", {}):
+            # Convert bytes to PIL Image
+            screenshot_bytes = result["data"]["screenshot"]
+            image = Image.open(BytesIO(screenshot_bytes))
+            print(f"Captured a browser screenshot: {image.size} pixels")
+            memory_step.observations_images = [image.copy()]  # Create a copy to ensure it persists
+        
+        # Get current URL
+        state_result = browser_process.execute(action="get_current_state")
+        if state_result["success"] and "url" in state_result.get("data", {}):
+            url_info = f"Current url: {state_result['data']['url']}"
+            memory_step.observations = (
+                url_info if memory_step.observations is None else memory_step.observations + "\n" + url_info
+            )
+
 # Configure the agent
 agent_config = AgentConfig(
     model_id=os.environ.get("AZURE_DEPLOYMENT_NAME"),  # 使用你的API部署中可用的模型
     name="research_assistant",
     description="A helpful research assistant",
-    # model_args={"api_key_var": "OPENAI_API_KEY", "base_url_var":"OPENAI_BASE_URL"},  # Will use OPENAI_API_KEY from environment
     model_args={"azure_endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
                 "api_key": os.environ.get("AZURE_OPENAI_API_KEY"),
                 "api_version": os.environ.get("OPENAI_API_VERSION"),
-                },  # Will use OPENAI_API_KEY from environment
-    #tools=["minion_agent.tools.web_browsing.search_web"],
+                },
     tools=[
-        #"minion_agent.tools.web_browsing.search_web","minion_agent.tools.web_browsing.visit_webpage",
         "minion_agent.tools.browser_tool.browser",
         MCPTool(
-                    command="npx",
-                    args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace"]
-
-                )
-           ],
+            command="npx",
+            args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace"]
+        )
+    ],
     agent_type="CodeAgent",
     model_type="AzureOpenAIServerModel",
-    #agent_args={"additional_authorized_imports":["openai","bs4","os"]}
-    agent_args={"additional_authorized_imports":"*"}
+    agent_args={"additional_authorized_imports":"*", "step_callbacks":[save_screenshot]}
 )
 
 # from opentelemetry.sdk.trace import TracerProvider

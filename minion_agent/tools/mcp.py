@@ -101,6 +101,7 @@ class SmolagentsMCPServerStdio(MCPServerBase):
 
     async def cleanup(self):
         """Clean up resources."""
+        pass
         # if self.context:
         #     self.__exit__(None, None, None)
 

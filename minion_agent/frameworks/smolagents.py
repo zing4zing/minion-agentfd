@@ -1,34 +1,21 @@
-"""Smolagents wrapper implementation."""
-
 import os
 from typing import Optional, Any, List
-import asyncio
-from functools import wraps
 
-from .minion_agent import MinionAgent
-from .. import AgentFramework
-from ..tools.wrappers import import_and_wrap_tools
+from minion_agent.config import AgentFramework, AgentConfig
+from minion_agent.frameworks.minion_agent import MinionAgent
+from minion_agent.tools.wrappers import import_and_wrap_tools
 
 try:
     import smolagents
     from smolagents import MultiStepAgent
+
     smolagents_available = True
 except ImportError:
-    smolagents_available = False
-
-from ..config import AgentConfig
+    smolagents_available = None
 
 DEFAULT_AGENT_TYPE = "CodeAgent"
 DEFAULT_MODEL_CLASS = "LiteLLMModel"
 
-def get_or_create_eventloop():
-    """Get the current event loop or create a new one if necessary."""
-    try:
-        return asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        return loop
 
 class SmolagentsAgent(MinionAgent):
     """Smolagents agent implementation that handles both loading and running."""
@@ -38,7 +25,7 @@ class SmolagentsAgent(MinionAgent):
     ):
         if not smolagents_available:
             raise ImportError(
-                "You need to `pip install 'minion-manus[smolagents]'` to use this agent"
+                "You need to `pip install 'minion-agent[smolagents]'` to use this agent"
             )
         self.managed_agents = managed_agents
         self.config = config
@@ -49,7 +36,6 @@ class SmolagentsAgent(MinionAgent):
 
     def _get_model(self, agent_config: AgentConfig):
         """Get the model configuration for a smolagents agent."""
-
         model_type = getattr(smolagents, agent_config.model_type or DEFAULT_MODEL_CLASS)
         kwargs = {
             "model_id": agent_config.model_id,
@@ -57,8 +43,6 @@ class SmolagentsAgent(MinionAgent):
         model_args = agent_config.model_args or {}
         if api_key_var := model_args.pop("api_key_var", None):
             kwargs["api_key"] = os.environ[api_key_var]
-        if base_url_var := model_args.pop("base_url_var", None):
-            kwargs["api_base"] = os.environ[base_url_var]
         return model_type(**kwargs, **model_args)
 
     def _merge_mcp_tools(self, mcp_servers):
@@ -98,7 +82,7 @@ class SmolagentsAgent(MinionAgent):
                     name=managed_agent.name,
                     model=self._get_model(managed_agent),
                     tools=managed_tools,
-                    verbosity_level=-1,  # OFF
+                    verbosity_level=2,  # OFF
                     description=managed_agent.description
                     or f"Use the agent: {managed_agent.name}",
                 )
@@ -126,40 +110,8 @@ class SmolagentsAgent(MinionAgent):
 
     async def run_async(self, prompt: str) -> Any:
         """Run the Smolagents agent with the given prompt."""
-        try:
-            result = self._agent.run(prompt)
-            return result
-        finally:
-            # Ensure cleanup happens after the run
-            await self.cleanup()
-
-    async def cleanup(self):
-        """Clean up resources properly."""
-        if self._mcp_servers:
-            for server in self._mcp_servers:
-                try:
-                    if hasattr(server, 'cleanup'):
-                        await server.cleanup()
-                    elif hasattr(server, 'close'):
-                        if hasattr(server, '_connection'):
-                            await server._connection.close()
-                        if hasattr(server, '_process'):
-                            server._process.terminate()
-                except Exception as e:
-                    print(f"Error during server cleanup: {e}")
-
-        if self._managed_mcp_servers:
-            for server in self._managed_mcp_servers:
-                try:
-                    if hasattr(server, 'cleanup'):
-                        await server.cleanup()
-                    elif hasattr(server, 'close'):
-                        if hasattr(server, '_connection'):
-                            await server._connection.close()
-                        if hasattr(server, '_process'):
-                            server._process.terminate()
-                except Exception as e:
-                    print(f"Error during managed server cleanup: {e}")
+        result = self._agent.run(prompt)
+        return result
 
     @property
     def tools(self) -> List[str]:
@@ -167,4 +119,4 @@ class SmolagentsAgent(MinionAgent):
         Return the tools used by the agent.
         This property is read-only and cannot be modified.
         """
-        return self._agent.tools if self._agent else []
+        return self._agent.tools
