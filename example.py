@@ -6,6 +6,15 @@ import os
 from PIL import Image
 from io import BytesIO
 from time import sleep
+from typing import List, Dict, Optional
+from smolagents import (Tool, ChatMessage)
+from smolagents.models import parse_json_if_needed
+from custom_azure_model import CustomAzureOpenAIServerModel
+
+def parse_tool_args_if_needed(message: ChatMessage) -> ChatMessage:
+    for tool_call in message.tool_calls:
+        tool_call.function.arguments = parse_json_if_needed(tool_call.function.arguments)
+    return message
 
 from minion_agent.config import MCPTool
 
@@ -53,7 +62,7 @@ def save_screenshot(memory_step: ActionStep, agent: CodeAgent) -> None:
 
 # Configure the agent
 agent_config = AgentConfig(
-    model_id=os.environ.get("AZURE_DEPLOYMENT_NAME"),  # 使用你的API部署中可用的模型
+    model_id=os.environ.get("AZURE_DEPLOYMENT_NAME"),
     name="research_assistant",
     description="A helpful research assistant",
     model_args={"azure_endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
@@ -68,10 +77,9 @@ agent_config = AgentConfig(
         )
     ],
     agent_type="CodeAgent",
-    model_type="AzureOpenAIServerModel",
+    model_type="CustomAzureOpenAIServerModel",  # Updated to use our custom model
     agent_args={"additional_authorized_imports":"*",
-                #"step_callbacks":[save_screenshot]
-                }
+                "planning_interval":3}
 )
 
 # from opentelemetry.sdk.trace import TracerProvider
@@ -94,8 +102,9 @@ async def main():
         # Run the agent with a question
         #result = await agent.run("search sam altman and export summary as markdown")
         #result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
-        result = await agent.run("搜索最新的人工智能发展趋势，并且总结为markdown")
+        #result = await agent.run("搜索最新的人工智能发展趋势，并且总结为markdown")
         #result = await agent.run("go visit https://www.baidu.com and clone it")
+        result = await agent.run("复刻一个电商网站,例如京东")
         #result = await agent.run("go visit https://www.baidu.com , take a screenshot and clone it")
         #result = await agent.run("实现一个贪吃蛇游戏")
         print("Agent's response:", result)

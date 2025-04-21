@@ -1,3 +1,7 @@
+**[![Documentation Status](https://img.shields.io/badge/documentation-brightgreen)](https://github.com/femto/minion-agent) 
+[![Install](https://img.shields.io/badge/get_started-blue)](https://github.com/femto/minion-agent) 
+[![Discord](https://dcbadge.limes.pink/api/server/HUC6xEK9aT?style=flat)](https://discord.gg/HUC6xEK9aT)
+[![Twitter Follow](https://img.shields.io/twitter/follow/femtowin?style=social)](https://x.com/femtowin)**
 # Minion Agent
 
 A simplified wrapper for smolagents that makes it easy to create and run AI agents.
@@ -33,6 +37,14 @@ print("Agent's response:", result)
 ```
 
 see example.py 
+
+## Community
+
+Join our WeChat discussion group to connect with other users and get help:
+
+![WeChat Discussion Group](docs/images/wechat_group_qr.png)
+
+群聊: minion-agent讨论群
 
 ## Configuration
 

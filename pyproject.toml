@@ -27,6 +27,9 @@ mcp = [
     "langchain-openai>=0.3.11",
     "smolagents[mcp]>=1.13.0"
 ]
+google = [
+  "google-adk","litellm"
+]
 
 [build-system]
 requires = ["hatchling"]
