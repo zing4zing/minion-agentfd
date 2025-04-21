@@ -54,6 +54,8 @@ The `AgentConfig` class accepts the following parameters:
 
 Minion Agent supports Model Context Protocol (MCP) tools. Here's how to use them:
 
+### Standard MCP Tool
+
 ```python
 from minion_agent.config import MCPTool
 
@@ -67,6 +69,38 @@ agent_config = AgentConfig(
         )  # MCP tool
     ]
 )
+```
+
+### SSE-based MCP Tool
+
+You can also use MCP tools over Server-Sent Events (SSE). This is useful for connecting to remote MCP servers:
+
+```python
+from minion_agent.config import MCPTool
+
+agent_config = AgentConfig(
+    # ... other config options ...
+    tools=[
+        MCPTool({
+            "url": "http://localhost:8000/sse",  # SSE endpoint URL
+            "headers": {  # Optional headers
+                "Authorization": "Bearer your-token"
+            }
+        })
+    ]
+)
+```
+
+⚠️ **Security Warning**: When using MCP servers over SSE, be extremely cautious and only connect to trusted and verified servers. Always verify the source and security of any MCP server before connecting.
+
+You can also use multiple MCP tools together:
+
+```python
+tools=[
+    MCPTool(command="npx", args=["..."]),  # Standard MCP tool
+    MCPTool({"url": "http://localhost:8000/sse"}),  # SSE-based tool
+    MCPTool({"url": "http://localhost:8001/sse"})   # Another SSE-based tool
+]
 ```
 
 ## Planning Support
