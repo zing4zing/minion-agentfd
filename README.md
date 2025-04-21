@@ -38,14 +38,6 @@ print("Agent's response:", result)
 
 see example.py 
 
-## Community
-
-Join our WeChat discussion group to connect with other users and get help:
-
-![WeChat Discussion Group](docs/images/wechat_group_qr.png)
-
-群聊: minion-agent讨论群
-
 ## Configuration
 
 The `AgentConfig` class accepts the following parameters:
@@ -57,6 +49,45 @@ The `AgentConfig` class accepts the following parameters:
 - `tools`: List of tools the agent can use
 - `model_args`: Optional dictionary of model-specific arguments
 - `agent_args`: Optional dictionary of agent-specific arguments
+
+## MCP Tool Support
+
+Minion Agent supports Model Context Protocol (MCP) tools. Here's how to use them:
+
+```python
+from minion_agent.config import MCPTool
+
+agent_config = AgentConfig(
+    # ... other config options ...
+    tools=[
+        "minion_agent.tools.browser_tool.browser",  # Regular tools
+        MCPTool(
+            command="npx",
+            args=["-y", "@modelcontextprotocol/server-filesystem", "/path/to/workspace"]
+        )  # MCP tool
+    ]
+)
+```
+
+## Planning Support
+
+You can enable automatic planning by setting the `planning_interval` in `agent_args`:
+
+```python
+agent_config = AgentConfig(
+    # ... other config options ...
+    agent_args={
+        "planning_interval": 3,  # Agent will create a plan every 3 steps
+        "additional_authorized_imports": "*"
+    }
+)
+```
+
+The `planning_interval` parameter determines how often the agent should create a new plan. When set to 3, the agent will:
+1. Create an initial plan for the task
+2. Execute 3 steps according to the plan
+3. Re-evaluate and create a new plan based on progress
+4. Repeat until the task is complete
 
 ## Environment Variables
 
@@ -82,6 +113,14 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install development dependencies
 pip install -e ".[dev]"
 ```
+
+## Community
+
+Join our WeChat discussion group to connect with other users and get help:
+
+![WeChat Discussion Group](docs/images/wechat_group_qr.png)
+
+群聊: minion-agent讨论群
 
 ## License
 
