@@ -24,7 +24,6 @@ agent_config = AgentConfig(
     model_id="gpt-4o",  # or your preferred model
     name="Research Assistant",
     description="A helpful research assistant",
-    instructions="You are a helpful research assistant that can search the web and visit webpages.",
     model_args={"api_key_var": "OPENAI_API_KEY"}  # Will use OPENAI_API_KEY from environment
 )
 
