@@ -70,41 +70,70 @@ agent_config = AgentConfig(
                 "api_version": os.environ.get("OPENAI_API_VERSION"),
                 },
     tools=[
-        "minion_agent.tools.browser_tool.browser",
+        #"minion_agent.tools.browser_tool.browser",
         MCPTool(
             command="npx",
             args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace"]
         )
     ],
     agent_type="CodeAgent",
-    model_type="CustomAzureOpenAIServerModel",  # Updated to use our custom model
+    model_type="AzureOpenAIServerModel",  # Updated to use our custom model
+    #model_type="CustomAzureOpenAIServerModel",  # Updated to use our custom model
     agent_args={"additional_authorized_imports":"*",
-                "planning_interval":3}
+                #"planning_interval":3
+                }
 )
+managed_agents = [
+    AgentConfig(
+        name="search_web_agent",
+        model_id="gpt-4o-mini",
+        description="Agent that can use the browser, search the web,navigate",
+        #tools=["minion_agent.tools.web_browsing.search_web"]
+        tools=["minion_agent.tools.browser_tool.browser"],
+model_args={"azure_endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
+                "api_key": os.environ.get("AZURE_OPENAI_API_KEY"),
+                "api_version": os.environ.get("OPENAI_API_VERSION"),
+                },
+model_type="AzureOpenAIServerModel",  # Updated to use our custom model
+    #model_type="CustomAzureOpenAIServerModel",  # Updated to use our custom model
+agent_type="ToolCallingAgent",
+    agent_args={
+        #"additional_authorized_imports":"*",
+                #"planning_interval":3
+                }
+    ),
+    # AgentConfig(
+    #     name="visit_webpage_agent",
+    #     model_id="gpt-4o-mini",
+    #     description="Agent that can visit webpages",
+    #     tools=["minion_agent.tools.web_browsing.visit_webpage"]
+    # )
+]
 
-# from opentelemetry.sdk.trace import TracerProvider
-#
-# from openinference.instrumentation.smolagents import SmolagentsInstrumentor
-# from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-# from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-#
-# otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
-# trace_provider = TracerProvider()
-# trace_provider.add_span_processor(SimpleSpanProcessor(otlp_exporter))
-#
-# SmolagentsInstrumentor().instrument(tracer_provider=trace_provider)
+from opentelemetry.sdk.trace import TracerProvider
+
+from openinference.instrumentation.smolagents import SmolagentsInstrumentor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+
+otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
+trace_provider = TracerProvider()
+trace_provider.add_span_processor(SimpleSpanProcessor(otlp_exporter))
+
+SmolagentsInstrumentor().instrument(tracer_provider=trace_provider)
 
 async def main():
     try:
         # Create and run the agent
-        agent = await MinionAgent.create(AgentFramework.SMOLAGENTS, agent_config)
+        agent = await MinionAgent.create(AgentFramework.SMOLAGENTS, agent_config, managed_agents)
         
         # Run the agent with a question
         #result = await agent.run("search sam altman and export summary as markdown")
         #result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
+        #result = await agent.run("打开微信公众号")
         #result = await agent.run("搜索最新的人工智能发展趋势，并且总结为markdown")
-        #result = await agent.run("go visit https://www.baidu.com and clone it")
-        result = await agent.run("复刻一个电商网站,例如京东")
+        result = await agent.run("go visit https://www.baidu.com and clone it")
+        #result = await agent.run("复刻一个电商网站,例如京东")
         #result = await agent.run("go visit https://www.baidu.com , take a screenshot and clone it")
         #result = await agent.run("实现一个贪吃蛇游戏")
         print("Agent's response:", result)

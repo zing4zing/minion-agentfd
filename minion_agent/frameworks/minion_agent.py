@@ -17,7 +17,7 @@ class MinionAgent(ABC):
         agent_framework: AgentFramework,
         agent_config: AgentConfig,
         managed_agents: Optional[list[AgentConfig]] = None,
-    ) -> "AnyAgent":
+    ) -> "MinionAgent":
         if agent_framework == AgentFramework.SMOLAGENTS:
             from minion_agent.frameworks.smolagents import SmolagentsAgent as Agent
         elif agent_framework == AgentFramework.LANGCHAIN:
@@ -28,6 +28,8 @@ class MinionAgent(ABC):
             from minion_agent.frameworks.llama_index import LlamaIndexAgent as Agent
         elif agent_framework == AgentFramework.GOOGLE:
             from minion_agent.frameworks.google import GoogleAgent as Agent
+        elif agent_framework == AgentFramework.MINION:
+            from minion_agent.frameworks.minion import MinionBrainAgent as Agent
         else:
             raise ValueError(f"Unsupported agent framework: {agent_framework}")
             

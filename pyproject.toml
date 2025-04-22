@@ -30,6 +30,16 @@ mcp = [
 google = [
   "google-adk","litellm"
 ]
+smolagents = [
+  "smolagents[litellm,mcp]>=1.10.0",
+  "openinference-instrumentation-smolagents"
+]
+minion = [
+  "minionx>=0.0.1",
+]
+all = [
+  "minion-agent[google,smolagents,mcp,minion]"
+]
 
 [build-system]
 requires = ["hatchling"]
