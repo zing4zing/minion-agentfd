@@ -27,6 +27,8 @@ class AgentFramework(str, Enum):
     LLAMAINDEX = "llama_index"
     OPENAI = "openai"
     SMOLAGENTS = "smolagents"
+    MINION = "minion"
+    BROWSER_USE = "browser_use"
 
 
 class MCPTool(BaseModel):
