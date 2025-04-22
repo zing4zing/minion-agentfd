@@ -1,26 +1,27 @@
 import os
 from typing import Optional, Any, List
+from pydantic import SecretStr
 
 from minion_agent.config import AgentFramework, AgentConfig
 from minion_agent.frameworks.minion_agent import MinionAgent
 from minion_agent.tools.wrappers import import_and_wrap_tools
 
 try:
-    import browser_use
-
+    from browser_use import Agent
+    from langchain_openai import AzureChatOpenAI
     browser_use_available = True
 except ImportError:
     browser_use_available = None
 
-
+DEFAULT_MODEL_CLASS = "AzureChatOpenAI"
 
 class BrowserUseAgent(MinionAgent):
-    """minion agent implementation that handles both loading and running."""
+    """Browser-use agent implementation that handles both loading and running."""
 
     def __init__(
         self, config: AgentConfig, managed_agents: Optional[list[AgentConfig]] = None
     ):
-        if not browser_use:
+        if not browser_use_available:
             raise ImportError(
                 "You need to `pip install 'minion-agent[browser_use]'` to use this agent"
             )
@@ -29,85 +30,46 @@ class BrowserUseAgent(MinionAgent):
         self._agent = None
         self._agent_loaded = False
         self._mcp_servers = None
-        self._managed_mcp_servers = None
 
     def _get_model(self, agent_config: AgentConfig):
-        """Get the model configuration for a smolagents agent."""
-        model_type = getattr(smolagents, agent_config.model_type or DEFAULT_MODEL_CLASS)
-        kwargs = {
-            "model_id": agent_config.model_id,
-        }
+        """Get the model configuration for a browser-use agent."""
         model_args = agent_config.model_args or {}
-        if api_key_var := model_args.pop("api_key_var", None):
-            kwargs["api_key"] = os.environ[api_key_var]
-        return model_type(**kwargs, **model_args)
-
-    def _merge_mcp_tools(self, mcp_servers):
-        """Merge MCP tools from different servers."""
-        tools = []
-        for mcp_server in mcp_servers:
-            tools.extend(mcp_server.tools)
-        return tools
+        
+        # Extract Azure OpenAI configuration
+        azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT', '')
+        api_key = os.getenv('AZURE_OPENAI_KEY', '')
+        
+        kwargs = {
+            "model": agent_config.model_id or "gpt-4",
+            "api_version": model_args.get("api_version", "2024-02-15"),
+            "azure_endpoint": azure_endpoint,
+            "api_key": SecretStr(api_key),
+            "temperature": model_args.get("temperature", 0)
+        }
+        
+        return AzureChatOpenAI(**kwargs)
 
     async def _load_agent(self) -> None:
-        """Load the Smolagents agent with the given configuration."""
-
-        if not self.managed_agents and not self.config.tools:
-            self.config.tools = [
-                "minion_agent.tools.search_web",
-                "minion_agent.tools.visit_webpage",
-            ]
+        """Load the Browser-use agent with the given configuration."""
+        if not self.config.tools:
+            self.config.tools = []  # Browser-use has built-in browser automation tools
 
         tools, mcp_servers = await import_and_wrap_tools(
-            self.config.tools, agent_framework=AgentFramework.SMOLAGENTS
+            self.config.tools, agent_framework=AgentFramework.BROWSER_USE
         )
         self._mcp_servers = mcp_servers
-        tools.extend(self._merge_mcp_tools(mcp_servers))
 
-        managed_agents_instanced = []
-        if self.managed_agents:
-            for managed_agent in self.managed_agents:
-                agent_type = getattr(
-                    smolagents, managed_agent.agent_type or DEFAULT_AGENT_TYPE
-                )
-                managed_tools, managed_mcp_servers = await import_and_wrap_tools(
-                    managed_agent.tools, agent_framework=AgentFramework.SMOLAGENTS
-                )
-                self._managed_mcp_servers = managed_mcp_servers
-                tools.extend(self._merge_mcp_tools(managed_mcp_servers))
-                managed_agent_instance = agent_type(
-                    name=managed_agent.name,
-                    model=self._get_model(managed_agent),
-                    tools=managed_tools,
-                    verbosity_level=2,  # OFF
-                    description=managed_agent.description
-                    or f"Use the agent: {managed_agent.name}",
-                )
-                if managed_agent.instructions:
-                    managed_agent_instance.prompt_templates["system_prompt"] = (
-                        managed_agent.instructions
-                    )
-                managed_agents_instanced.append(managed_agent_instance)
-
-        main_agent_type = getattr(
-            smolagents, self.config.agent_type or DEFAULT_AGENT_TYPE
+        # Initialize the browser-use Agent
+        self._agent = Agent(
+            task=self.config.instructions or "No specific task provided",
+            llm=self._get_model(self.config)
         )
-
-        self._agent: MultiStepAgent = main_agent_type(
-            name=self.config.name,
-            model=self._get_model(self.config),
-            tools=tools,
-            verbosity_level=2,  # OFF
-            managed_agents=managed_agents_instanced,
-            **self.config.agent_args or {},
-        )
-
-        if self.config.instructions:
-            self._agent.prompt_templates["system_prompt"] = self.config.instructions
 
     async def run_async(self, prompt: str) -> Any:
-        """Run the Smolagents agent with the given prompt."""
-        result = self._agent.run(prompt)
+        """Run the Browser-use agent with the given prompt."""
+        # Update the agent's task with the new prompt
+        self._agent.task = prompt
+        result = await self._agent.run()
         return result
 
     @property
@@ -116,4 +78,4 @@ class BrowserUseAgent(MinionAgent):
         Return the tools used by the agent.
         This property is read-only and cannot be modified.
         """
-        return self._agent.tools
+        return ["browser_automation"]  # Browser-use has built-in browser tools

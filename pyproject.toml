@@ -1,7 +1,7 @@
 [project]
-name = "minion-agent"
-version = "0.1.0"
-description = "A wrapper for smolagents to make it easier to use"
+name = "minion-agent-x"
+version = "0.1.2"
+description = "An enhanced version of minion-agent with extended capabilities"
 authors = [
     {name = "femtozheng", email = "femtozheng@example.com"},
 ]
@@ -40,7 +40,7 @@ minion = [
   "minionx>=0.0.1",
 ]
 all = [
-  "minion-agent[google,smolagents,mcp,minion]"
+  "minion-agent-x[google,smolagents,mcp,minion]"
 ]
 
 [build-system]
