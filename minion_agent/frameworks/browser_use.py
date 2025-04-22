@@ -1,4 +1,5 @@
 import os
+import importlib
 from typing import Optional, Any, List
 from pydantic import SecretStr
 
@@ -8,12 +9,11 @@ from minion_agent.tools.wrappers import import_and_wrap_tools
 
 try:
     from browser_use import Agent
-    from langchain_openai import AzureChatOpenAI
     browser_use_available = True
 except ImportError:
     browser_use_available = None
 
-DEFAULT_MODEL_CLASS = "AzureChatOpenAI"
+DEFAULT_MODEL_CLASS = "langchain_openai.ChatOpenAI"
 
 class BrowserUseAgent(MinionAgent):
     """Browser-use agent implementation that handles both loading and running."""
@@ -32,22 +32,13 @@ class BrowserUseAgent(MinionAgent):
         self._mcp_servers = None
 
     def _get_model(self, agent_config: AgentConfig):
-        """Get the model configuration for a browser-use agent."""
-        model_args = agent_config.model_args or {}
-        
-        # Extract Azure OpenAI configuration
-        azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT', '')
-        api_key = os.getenv('AZURE_OPENAI_KEY', '')
-        
-        kwargs = {
-            "model": agent_config.model_id or "gpt-4",
-            "api_version": model_args.get("api_version", "2024-02-15"),
-            "azure_endpoint": azure_endpoint,
-            "api_key": SecretStr(api_key),
-            "temperature": model_args.get("temperature", 0)
-        }
-        
-        return AzureChatOpenAI(**kwargs)
+        """Get the model configuration for a LangChain agent."""
+        if not agent_config.model_type:
+            agent_config.model_type = DEFAULT_MODEL_CLASS
+        module, class_name = agent_config.model_type.split(".")
+        model_type = getattr(importlib.import_module(module), class_name)
+
+        return model_type(model=agent_config.model_id, **agent_config.model_args or {})
 
     async def _load_agent(self) -> None:
         """Load the Browser-use agent with the given configuration."""

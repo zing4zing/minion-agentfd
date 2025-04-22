@@ -39,7 +39,17 @@ def wrap_tool_smolagents(tool):
     if not isinstance(tool, Tool):
         return smolagents_tool(tool)
     return tool
+def wrap_tool_minion(tool):
+    #minion framework defined BaseTool and @tool
+    from minion import BaseTool, tool as minion_tool
 
+    if not isinstance(tool, BaseTool):
+        return minion_tool(tool)
+    return tool
+
+def wrap_tool_browser_use(tool):
+    #browser_use don't use any tools now
+    return tool
 
 def wrap_tool_llama_index(tool):
     from llama_index.core.tools import FunctionTool
@@ -92,6 +102,8 @@ WRAPPERS = {
     AgentFramework.LANGCHAIN: wrap_tool_langchain,
     AgentFramework.SMOLAGENTS: wrap_tool_smolagents,
     AgentFramework.LLAMAINDEX: wrap_tool_llama_index,
+    AgentFramework.MINION: wrap_tool_minion,
+    AgentFramework.BROWSER_USE: wrap_tool_browser_use, #actually none
 }
 
 

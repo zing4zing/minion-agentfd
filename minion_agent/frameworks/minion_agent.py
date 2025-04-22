@@ -30,6 +30,8 @@ class MinionAgent(ABC):
             from minion_agent.frameworks.google import GoogleAgent as Agent
         elif agent_framework == AgentFramework.MINION:
             from minion_agent.frameworks.minion import MinionBrainAgent as Agent
+        elif agent_framework == AgentFramework.BROWSER_USE:
+            from minion_agent.frameworks.browser_use import BrowserUseAgent as Agent
         else:
             raise ValueError(f"Unsupported agent framework: {agent_framework}")
             
@@ -42,9 +44,9 @@ class MinionAgent(ABC):
         """Load the agent instance."""
         pass
 
-    async def run(self, prompt: str) -> Any:
+    def run(self, prompt: str) -> Any:
         """Run the agent with the given prompt."""
-        return await self.run_async(prompt)
+        return asyncio.get_event_loop().run_until_complete(self.run_async(prompt))
 
     @abstractmethod
     async def run_async(self, prompt: str) -> Any:

@@ -2,30 +2,37 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from minion_agent.config import AgentConfig
-from minion_agent.frameworks.browser_use import BrowserUseAgent
+from minion_agent.frameworks.minion_agent import MinionAgent
+from minion_agent import MinionAgent, AgentConfig, AgentFramework
 
 # Load environment variables from .env file
 load_dotenv()
 
 async def main():
+    # Get Azure configuration from environment variables
+    azure_deployment = os.getenv('AZURE_DEPLOYMENT_NAME')
+    api_version = os.getenv('OPENAI_API_VERSION')
+    if not azure_deployment:
+        raise ValueError("AZURE_DEPLOYMENT_NAME environment variable is not set")
+    if not api_version:
+        raise ValueError("OPENAI_API_VERSION environment variable is not set")
+
     # Create agent configuration
     config = AgentConfig(
         name="browser-agent",
-        model_id="gpt-4.1",  # Your Azure OpenAI deployed model name
+        model_type="langchain_openai.AzureChatOpenAI",
+        model_id=azure_deployment,
         model_args={
-            "api_version": "2024-02-15",
-            "temperature": 0
+            "azure_deployment": azure_deployment,
+            "api_version": api_version,
         },
         # You can specify initial instructions here
-        instructions="Compare the price of gpt-4o and DeepSeek-V3"
+        instructions="Compare the price of gpt-4o and DeepSeek-V3",
+
     )
 
-    # Initialize the browser use agent
-    agent = BrowserUseAgent(config)
-    
-    # Make sure the agent is loaded before running
-    if not agent._agent_loaded:
-        await agent._load_agent()
+    # Create and initialize the agent using MinionAgent.create
+    agent = await MinionAgent.create(AgentFramework.BROWSER_USE, config)
 
     # Run the agent with a specific task
     result = await agent.run_async("Compare the price of gpt-4o and DeepSeek-V3 and create a detailed comparison table")
@@ -37,7 +44,12 @@ async def main():
 
 if __name__ == "__main__":
     # Verify environment variables
-    required_vars = ['AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_KEY']
+    required_vars = [
+        'AZURE_OPENAI_ENDPOINT',
+        'AZURE_OPENAI_API_KEY',
+        'AZURE_DEPLOYMENT_NAME',
+        'OPENAI_API_VERSION'
+    ]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     
     if missing_vars:
@@ -45,7 +57,9 @@ if __name__ == "__main__":
         print("Please set these variables in your .env file:")
         print("""
 AZURE_OPENAI_ENDPOINT=your_endpoint_here
-AZURE_OPENAI_KEY=your_key_here
+AZURE_OPENAI_API_KEY=your_key_here
+AZURE_DEPLOYMENT_NAME=your_deployment_name_here
+OPENAI_API_VERSION=your_api_version_here  # e.g. 2024-02-15
         """)
     else:
         asyncio.run(main()) 
