@@ -21,24 +21,21 @@ async def main():
     model_id=os.environ.get("AZURE_DEPLOYMENT_NAME"),
     name="research_assistant",
     description="A helpful research assistant",
-    model_args={
-        "azure_endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
+    model_args={"azure_endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
                 "api_key": os.environ.get("AZURE_OPENAI_API_KEY"),
-                "api_key_var": "AZURE_OPENAI_API_KEY",
                 "api_version": os.environ.get("OPENAI_API_VERSION"),
                 },
     tools=[
         #"minion_agent.tools.browser_tool.browser",
         MCPTool(
             command="npx",
-            args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace"]
+            args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace","/Users/femtozheng/python-project/minion-agent"]
         )
     ],
     agent_type="CodeAgent",
     model_type="AzureOpenAIServerModel",  # Updated to use our custom model
     #model_type="CustomAzureOpenAIServerModel",  # Updated to use our custom model
-    agent_args={
-        #"additional_authorized_imports":"*",
+    agent_args={"additional_authorized_imports":"*",
                 #"planning_interval":3
                 }
 )
@@ -62,8 +59,7 @@ async def main():
 
     # Create and initialize the main agent with the browser agent as managed agent
     agent = await MinionAgent.create(
-        #AgentFramework.SMOLAGENTS,
-        AgentFramework.OPENAI,
+        AgentFramework.SMOLAGENTS,
         main_agent_config,
         managed_agents=[browser_agent]
     )
@@ -71,8 +67,12 @@ async def main():
     # Example tasks that combine filesystem and browser capabilities
     tasks = [
         #"Search for 'latest AI developments' ",
-        "Compare the price of gpt-4o and DeepSeek-V3",
-        # "Visit baidu.com, take a screenshot, and save it to the workspace",
+        #"Compare the price of gpt-4o and DeepSeek-V3 and save the result as markdown",
+        #"Visit baidu.com, take a screenshot, and save it to the workspace",
+        #"browse baidu.com and clone it",
+        #"browse jd.com and clone it",
+        "请使用browser use 打开微信公众号，发表一篇关于人工智能时代的思考",
+        #"复刻一个电商网站"
         # "Compare GPT-4 and Claude pricing, create a comparison table, and save it as a markdown document"
     ]
 

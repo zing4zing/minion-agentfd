@@ -79,7 +79,7 @@ class MinionAgent(ABC):
         and prevent direct dependency on specific agent implementations.
 
         If you need functionality that relies on accessing the underlying agent:
-        1. Consider if the functionality can be added to the AnyAgent interface
+        1. Consider if the functionality can be added to the MinionAgent interface
         2. Submit a GitHub issue describing your use case
         3. Contribute a PR implementing the needed functionality
 
@@ -87,5 +87,5 @@ class MinionAgent(ABC):
             NotImplementedError: Always raised when this property is accessed
         """
         raise NotImplementedError(
-            "Cannot access the 'agent' property of AnyAgent, if you need to use functionality that relies on the underlying agent framework, please file a Github Issue or we welcome a PR to add the functionality to the AnyAgent class"
+            "Cannot access the 'agent' property of MinionAgent, if you need to use functionality that relies on the underlying agent framework, please file a Github Issue or we welcome a PR to add the functionality to the MinionAgent class"
         )

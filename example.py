@@ -73,7 +73,7 @@ agent_config = AgentConfig(
         #"minion_agent.tools.browser_tool.browser",
         MCPTool(
             command="npx",
-            args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace"]
+            args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace","/Users/femtozheng/python-project/minion-agent"]
         )
     ],
     agent_type="CodeAgent",
