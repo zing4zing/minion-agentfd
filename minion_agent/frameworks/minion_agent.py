@@ -44,12 +44,14 @@ class MinionAgent(ABC):
         """Load the agent instance."""
         pass
 
-    def run(self, prompt: str) -> Any:
+    def run(self, task: str) -> Any:
         """Run the agent with the given prompt."""
-        return asyncio.get_event_loop().run_until_complete(self.run_async(prompt))
+        return asyncio.get_event_loop().run_until_complete(self.run_async(task))
+    def __call__(self, *args, **kwargs):
+        return self.run(*args, **kwargs)
 
     @abstractmethod
-    async def run_async(self, prompt: str) -> Any:
+    async def run_async(self, task: str) -> Any:
         """Run the agent asynchronously with the given prompt."""
         pass
 

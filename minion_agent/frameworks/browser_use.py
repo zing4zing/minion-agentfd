@@ -17,6 +17,8 @@ DEFAULT_MODEL_CLASS = "langchain_openai.ChatOpenAI"
 
 class BrowserUseAgent(MinionAgent):
     """Browser-use agent implementation that handles both loading and running."""
+    name = "browser_agent"
+    description = "Browser-use agent"
 
     def __init__(
         self, config: AgentConfig, managed_agents: Optional[list[AgentConfig]] = None

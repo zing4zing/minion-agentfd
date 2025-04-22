@@ -70,6 +70,9 @@ class SmolagentsAgent(MinionAgent):
         managed_agents_instanced = []
         if self.managed_agents:
             for managed_agent in self.managed_agents:
+                if isinstance(managed_agent, MinionAgent):
+                    managed_agents_instanced.append(managed_agent)
+                    continue
                 agent_type = getattr(
                     smolagents, managed_agent.agent_type or DEFAULT_AGENT_TYPE
                 )
