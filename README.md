@@ -35,7 +35,9 @@ result = agent.run("What are the latest developments in AI?")
 print("Agent's response:", result)
 ```
 
-see example.py 
+see example.py
+see example_browser_use.py
+see example_with_managed_agents.py
 
 ## Configuration
 
