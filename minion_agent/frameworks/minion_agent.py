@@ -48,6 +48,7 @@ class MinionAgent(ABC):
         """Run the agent with the given prompt."""
         return asyncio.get_event_loop().run_until_complete(self.run_async(task))
     def __call__(self, *args, **kwargs):
+        #may be add some pre_prompt, post_prompt as being called as sub agents?
         return self.run(*args, **kwargs)
 
     @abstractmethod

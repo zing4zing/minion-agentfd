@@ -71,4 +71,4 @@ class BrowserUseAgent(MinionAgent):
         Return the tools used by the agent.
         This property is read-only and cannot be modified.
         """
-        return ["browser_automation"]  # Browser-use has built-in browser tools
+        return []  # Browser-use has built-in browser tools
