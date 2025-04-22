@@ -8,11 +8,13 @@ from minion_agent.tools.mcp import (
     GoogleMCPServerStdio,
     LlamaIndexMCPServerStdio,
     SmolagentsMCPServerStdio,
+    MinionMCPServerStdio,
+    BrowserUseMCPServerStdio,
     OpenAIMCPServerStdio,
     LangchainMCPServerStdio,
     MCPServerBase,
-    
-    
+
+
 )
 
 
@@ -81,6 +83,8 @@ async def wrap_mcp_server(
         AgentFramework.LANGCHAIN: LangchainMCPServerStdio,
         AgentFramework.GOOGLE: GoogleMCPServerStdio,
         AgentFramework.LLAMAINDEX: LlamaIndexMCPServerStdio,
+        AgentFramework.MINION: MinionMCPServerStdio,
+        AgentFramework.BROWSER_USE: BrowserUseMCPServerStdio,
     }
 
     if agent_framework not in mcp_server_map:
