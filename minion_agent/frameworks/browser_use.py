@@ -1,6 +1,7 @@
 import os
 import importlib
 from typing import Optional, Any, List
+
 from pydantic import SecretStr
 
 from minion_agent.config import AgentFramework, AgentConfig
@@ -9,6 +10,8 @@ from minion_agent.tools.wrappers import import_and_wrap_tools
 
 try:
     from browser_use import Agent
+    from browser_use import Agent, Browser, BrowserConfig
+
     browser_use_available = True
 except ImportError:
     browser_use_available = None
@@ -53,15 +56,27 @@ class BrowserUseAgent(MinionAgent):
         self._mcp_servers = mcp_servers
 
         # Initialize the browser-use Agent
+        browser = Browser(
+            config=BrowserConfig(
+                # Specify the path to your Chrome executable
+                browser_binary_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',  # macOS path
+                # For Windows, typically: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+                # For Linux, typically: '/usr/bin/google-chrome'
+            )
+        )
+
         self._agent = Agent(
             task=self.config.instructions or "No specific task provided",
-            llm=self._get_model(self.config)
+            llm=self._get_model(self.config),
+            browser = browser,
         )
 
     async def run_async(self, prompt: str) -> Any:
         """Run the Browser-use agent with the given prompt."""
         # Update the agent's task with the new prompt
         self._agent.task = prompt
+        self._agent._message_manager.task = prompt
+        self._agent._message_manager.state.history.messages[1].message.content = f'Your ultimate task is: """{prompt}""". If you achieved your ultimate task, stop everything and use the done action in the next step to complete the task. If not, continue as usual.'
         result = await self._agent.run()
         return result
 

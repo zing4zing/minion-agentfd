@@ -16,6 +16,7 @@ class BaseTool(ABC):
         """Execute the tool with the given arguments."""
         pass
 
+
     def to_smolagents(self):
         """Convert to smolagents tool."""
         from smolagents import Tool

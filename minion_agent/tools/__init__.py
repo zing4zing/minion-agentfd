@@ -5,6 +5,7 @@ from .user_interaction import (
     send_console_message,
 )
 from .web_browsing import search_web, visit_webpage
+from .image_generation import generate_image_sync
 
 __all__ = [
     "search_web",
@@ -13,4 +14,5 @@ __all__ = [
     "ask_user_verification",
     "visit_webpage",
     "send_console_message",
+    "generate_image_sync",
 ]
