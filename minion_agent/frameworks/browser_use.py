@@ -9,6 +9,7 @@ from minion_agent.frameworks.minion_agent import MinionAgent
 from minion_agent.tools.wrappers import import_and_wrap_tools
 
 try:
+    import browser_use
     from browser_use import Agent
     from browser_use import Agent, Browser, BrowserConfig
 
@@ -59,7 +60,7 @@ class BrowserUseAgent(MinionAgent):
         browser = Browser(
             config=BrowserConfig(
                 # Specify the path to your Chrome executable
-                browser_binary_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',  # macOS path
+                #browser_binary_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',  # macOS path
                 # For Windows, typically: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
                 # For Linux, typically: '/usr/bin/google-chrome'
             )
