@@ -40,11 +40,7 @@ async def main():
             command="npx",
             args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace","/Users/femtozheng/python-project/minion-agent"]
         ),
-        # MCPTool(
-        #     command="uv",
-        #     args=["--directory","/Users/femtozheng/python-project/mcp-image-gen", "run",
-        #           "image-gen"]
-        # )
+
     ],
     agent_type="CodeAgent",
     #agent_type="ToolCallingAgent",
@@ -89,8 +85,9 @@ async def main():
         #"Visit baidu.com, take a screenshot, and save it to the workspace",
         #"browse baidu.com and clone it",
         #"browse jd.com and clone it",
-        #"请使用browser use 打开微信公众号，发表一篇关于人工智能时代的思考，封面图片用cute_ai.png",
-        "生成一张可爱的人工智慧图片，并保存在磁盘上",
+        #"使用browser use 打开微信公众号，发表一篇关于人工智能时代的思考，封面图片用生成一张可爱的人工智慧图片",
+        "使用browser use 打开知乎，发表一篇关于人工智能时代的思考",
+        #"生成一张可爱的人工智慧图片，并保存在磁盘上",
         #"复刻一个电商网站"
         # "Compare GPT-4 and Claude pricing, create a comparison table, and save it as a markdown document"
     ]
