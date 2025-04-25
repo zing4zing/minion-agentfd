@@ -10,7 +10,7 @@ from minion_agent.frameworks.deep_research_types import (
     SourceList,
     DeepResearchResult,
     DeepResearchResults,
-    UserCommunication
+    UserCommunication, atavily_search_results
 )
 from loguru import logger
 
