@@ -4,7 +4,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/femtowin?style=social)](https://x.com/femtowin)**
 # Minion Agent
 
-A simplified wrapper for smolagents that's capable of browser use + mcp + auto instrument + plan
+A simple agent framework that's capable of browser use + mcp + auto instrument + plan
 
 ## Installation
 
