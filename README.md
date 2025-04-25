@@ -11,6 +11,12 @@ A simple agent framework that's capable of browser use + mcp + auto instrument +
 ```bash
 pip install minion-agent-x
 ```
+## Or from source
+```bash
+git clone git@github.com:femto/minion-agent.git
+cd minion-agent
+pip install -e .
+```
 
 ## Usage
 
