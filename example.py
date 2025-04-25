@@ -32,33 +32,33 @@ from smolagents import (
 )
 
 # Set up screenshot callback for Playwright
-def save_screenshot(memory_step: ActionStep, agent: CodeAgent) -> None:
-    sleep(1.0)  # Let JavaScript animations happen before taking the screenshot
-
-    # Get the browser tool
-    browser_tool = agent.tools.get("browser")
-    if browser_tool:
-        # Clean up old screenshots to save memory
-        for previous_memory_step in agent.memory.steps:
-            if isinstance(previous_memory_step, ActionStep) and previous_memory_step.step_number <= memory_step.step_number - 2:
-                previous_memory_step.observations_images = None
-
-        # Take screenshot using Playwright
-        result = browser_tool(action="screenshot")
-        if result["success"] and "screenshot" in result.get("data", {}):
-            # Convert bytes to PIL Image
-            screenshot_bytes = result["data"]["screenshot"]
-            image = Image.open(BytesIO(screenshot_bytes))
-            print(f"Captured a browser screenshot: {image.size} pixels")
-            memory_step.observations_images = [image.copy()]  # Create a copy to ensure it persists
-
-        # Get current URL
-        state_result = browser_tool(action="get_current_state")
-        if state_result["success"] and "url" in state_result.get("data", {}):
-            url_info = f"Current url: {state_result['data']['url']}"
-            memory_step.observations = (
-                url_info if memory_step.observations is None else memory_step.observations + "\n" + url_info
-            )
+# def save_screenshot(memory_step: ActionStep, agent: CodeAgent) -> None:
+#     sleep(1.0)  # Let JavaScript animations happen before taking the screenshot
+#
+#     # Get the browser tool
+#     browser_tool = agent.tools.get("browser")
+#     if browser_tool:
+#         # Clean up old screenshots to save memory
+#         for previous_memory_step in agent.memory.steps:
+#             if isinstance(previous_memory_step, ActionStep) and previous_memory_step.step_number <= memory_step.step_number - 2:
+#                 previous_memory_step.observations_images = None
+#
+#         # Take screenshot using Playwright
+#         result = browser_tool(action="screenshot")
+#         if result["success"] and "screenshot" in result.get("data", {}):
+#             # Convert bytes to PIL Image
+#             screenshot_bytes = result["data"]["screenshot"]
+#             image = Image.open(BytesIO(screenshot_bytes))
+#             print(f"Captured a browser screenshot: {image.size} pixels")
+#             memory_step.observations_images = [image.copy()]  # Create a copy to ensure it persists
+#
+#         # Get current URL
+#         state_result = browser_tool(action="get_current_state")
+#         if state_result["success"] and "url" in state_result.get("data", {}):
+#             url_info = f"Current url: {state_result['data']['url']}"
+#             memory_step.observations = (
+#                 url_info if memory_step.observations is None else memory_step.observations + "\n" + url_info
+#             )
 
 # Configure the agent
 agent_config = AgentConfig(
