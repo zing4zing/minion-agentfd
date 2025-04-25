@@ -28,7 +28,7 @@ class OpenAIAgent(MinionAgent):
     ):
         if not agents_available:
             raise ImportError(
-                "You need to `pip install 'minion-agent[openai]'` to use this agent"
+                "You need to `pip install 'minion-agent-x[openai]'` to use this agent"
             )
         self.managed_agents = managed_agents
         self.config = config

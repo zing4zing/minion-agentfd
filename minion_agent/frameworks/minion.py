@@ -22,7 +22,7 @@ class MinionBrainAgent(MinionAgent):
     ):
         if not minion_available:
             raise ImportError(
-                "You need to `pip install 'minion-agent[minion]'` to use this agent"
+                "You need to `pip install 'minion-agent-x[minion]'` to use this agent"
             )
         self.managed_agents = managed_agents
         self.config = config

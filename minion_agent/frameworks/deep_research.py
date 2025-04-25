@@ -548,234 +548,126 @@ class DeepResearcher:
         return answer
 
 def create_agent(config: dict, return_instance: bool = False) -> Any:
-    """
-    Factory method to create an agent with specified configuration.
-    """
-    logger.info("Creating agent with config: %s", config)
-    
-    default_config = {
-        "agent": {
-            "type": "deep_researcher",
-            "max_steps": 2,
-            "max_queries": 5,
-            "max_sources": 40,
-            "max_completion_tokens": 8192,
-            "user_timeout": 30.0,
-            "interactive": True,
-            "use_cache": True,
-            "remove_thinking_tags": True,
-            "debug_file_path": "",
-            "planning_model": "together_ai/Qwen/Qwen2.5-72B-Instruct-Turbo",
-            "summarization_model": "together_ai/meta-llama/Llama-3.3-70B-Instruct-Turbo",
-            "json_model": "together_ai/meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
-            "answer_model": "together_ai/deepseek-ai/DeepSeek-V3"
-        }
-    }
+    """Create a deep research agent from a config dict."""
+    if not deep_research_available:
+        raise ImportError("Deep research dependencies not available. Install with 'pip install minion-agent-x[deep-research]'")
 
-    # Merge configurations
-    config_dict = default_config.copy()
-    if config:
-        if isinstance(config, str):
-            logger.debug("Loading config from file: %s", config)
-            config = load_config(config)
-        for key, value in config.items():
-            if isinstance(value, dict) and key in config_dict and isinstance(config_dict[key], dict):
-                config_dict[key].update(value)
-            else:
-                config_dict[key] = value
+    # Load config from file if path is provided
+    if isinstance(config, str):
+        config = load_config(config)
 
-    agent_config = config_dict.get("agent")
-    agent_type = agent_config.pop("type")
-    logger.info("Creating agent of type: %s", agent_type)
+    # Get the agent type
+    agent_type = config.get("type", "deep_research")
 
-    if agent_type == "deep_researcher":
-        agent_config["budget"] = agent_config.pop("max_steps")
-        logger.debug("Initializing DeepResearcher with config: %s", agent_config)
-        researcher = DeepResearcher(**agent_config)
+    # Get the agent config
+    budget = config.get("budget", 6)
+    remove_thinking_tags = config.get("remove_thinking_tags", False)
+    max_queries = config.get("max_queries", -1)
+    max_sources = config.get("max_sources", -1)
+    max_completion_tokens = config.get("max_completion_tokens", 4096)
+    user_timeout = config.get("user_timeout", 30.0)
+    interactive = config.get("interactive", False)
+    planning_model = config.get("planning_model", "together_ai/meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo")
+    summarization_model = config.get("summarization_model", "together_ai/meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo")
+    json_model = config.get("json_model", "together_ai/meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo")
+    answer_model = config.get("answer_model", "together_ai/deepseek-ai/DeepSeek-R1-Distill-Llama-70B")
+    debug_file_path = config.get("debug_file_path", None)
+    cache_dir = config.get("cache_dir", None)
+    use_cache = config.get("use_cache", False)
 
-        if return_instance:
-            return researcher
+    # Create the agent instance
+    agent = DeepResearcher(
+        budget=budget,
+        remove_thinking_tags=remove_thinking_tags,
+        max_queries=max_queries,
+        max_sources=max_sources,
+        max_completion_tokens=max_completion_tokens,
+        user_timeout=user_timeout,
+        interactive=interactive,
+        planning_model=planning_model,
+        summarization_model=summarization_model,
+        json_model=json_model,
+        answer_model=answer_model,
+        debug_file_path=debug_file_path,
+        cache_dir=cache_dir,
+        use_cache=use_cache,
+    )
 
-        def research_wrapper(goal: str):
-            logger.info("Starting research for goal: %s", goal)
-            import asyncio
-            try:
-                result = asyncio.run(researcher.research_topic(goal))
-                logger.info("Research completed successfully")
-                return result
-            except Exception as e:
-                logger.error("Research failed: %s", str(e), exc_info=True)
-                raise
+    if return_instance:
+        return agent
 
-        return research_wrapper
-
-    elif agent_type == "langchain_deep_researcher":
-        logger.info("Initializing langchain deep researcher")
+    def research_wrapper(goal: str):
+        """Wrapper function to run research."""
         try:
-            import uuid
-            from langgraph.checkpoint.memory import MemorySaver
-            from open_deep_research.graph import builder
-        except ImportError as e:
-            logger.error("Failed to import langchain dependencies: %s", str(e))
-            raise ImportError(
-                f"Failed to import required modules for langchain deep researcher: {e}. Make sure langgraph and open_deep_research are installed."
-            )
+            return agent(goal)
+        except Exception as e:
+            logger.error(f"Error in research: {e}")
+            return str(e)
 
-        memory = MemorySaver()
-        graph = builder.compile(checkpointer=memory)
-        logger.debug("Langchain graph compiled successfully")
-
-        REPORT_STRUCTURE = """Use this structure to create a report on the user-provided topic:
-
-                        1. Introduction (no research needed)
-                        - Brief overview of the topic area
-
-                        2. Main Body Sections:
-                        - Each section should focus on a sub-topic of the user-provided topic
-
-                        3. Conclusion
-                        - Aim for 1 structural element (either a list of table) that distills the main body sections 
-                        - Provide a concise summary of the report"""
-
-        # Extract configuration parameters
-        search_api = agent_config.get("search_api", "tavily")
-        planner_provider = agent_config.get("planner_provider")
-        planner_model = agent_config.get("planner_model")
-        writer_provider = agent_config.get("writer_provider")
-        writer_model = agent_config.get("writer_model")
-        max_search_depth = agent_config.get("max_search_depth", 3)
-
-        def langchain_wrapper(goal: str):
-            logger.info("Starting langchain research for goal: %s", goal)
-            import asyncio
-
-            thread = {
-                "configurable": {
-                    "thread_id": str(uuid.uuid4()),
-                    "search_api": search_api,
-                    "planner_provider": planner_provider,
-                    "planner_model": planner_model,
-                    "writer_provider": writer_provider,
-                    "writer_model": writer_model,
-                    "max_search_depth": max_search_depth,
-                    "report_structure": REPORT_STRUCTURE
-                }
-            }
-            logger.debug("Created research thread with ID: %s", thread["configurable"]["thread_id"])
-
-            # NOTE: add research prompt to the goal for robust benchmarking purposes
-            goal = goal + " You must perform in-depth research to answer the question."
-
-            results = []
+    def langchain_wrapper(goal: str):
+        """Wrapper function to run research with langchain."""
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
             async def run_graph():
-                async for event in graph.astream({"topic": goal}, thread, stream_mode="updates"):
-                    results.append(event)
+                try:
+                    return await agent.research_topic(goal)
+                except Exception as e:
+                    logger.error(f"Error in research: {e}")
+                    return str(e)
 
-                from langgraph.types import Command
-                async for event in graph.astream(Command(resume=True), thread, stream_mode="updates"):
-                    results.append(event)
+            try:
+                return loop.run_until_complete(run_graph())
+            finally:
+                loop.close()
+        except Exception as e:
+            logger.error(f"Error in research: {e}")
+            return str(e)
 
-                final_state = graph.get_state(thread)
-                report = final_state.values.get('final_report')
-
-                return report
-
-            return asyncio.run(run_graph())
-
-        return langchain_wrapper
-
-    elif agent_type == "base_llm":
-        logger.info("Initializing base LLM agent with model: %s", agent_config.get("model"))
-        model = agent_config.get("model")
-
-        def base_llm_wrapper(goal: str):
-            logger.info("Processing goal with base LLM: %s", goal)
-            import asyncio
-            from libs.utils.llms import asingle_shot_llm_call
-
-            system_prompt = (
-                "You are a helpful AI assistant. Answer the user's question accurately and concisely. "
-                "Reason through the problem step by step."
-            )
+    def base_llm_wrapper(goal: str):
+        """Wrapper function to run research with base llm."""
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
             async def get_answer():
                 try:
-                    result = await asingle_shot_llm_call(model=model, system_prompt=system_prompt, message=goal)
-                    logger.info("Successfully generated response with base LLM")
-                    return result
+                    return await asingle_shot_llm_call(
+                        model=agent.answer_model,
+                        system_prompt=agent.prompts["answer_prompt"],
+                        message=goal,
+                    )
                 except Exception as e:
-                    logger.error("Failed to generate response: %s", str(e), exc_info=True)
-                    raise
+                    logger.error(f"Error in research: {e}")
+                    return str(e)
 
-            return asyncio.run(get_answer())
-
-        return base_llm_wrapper
-
-    elif agent_type == "smolagents":
-        logger.info("Initializing smolagents agent")
-        try:
-            from baselines.smolagents_baseline import SmolAgentsTavilySearchTool
-            from smolagents import CodeAgent, LiteLLMModel
-            from smolagents.default_tools import VisitWebpageTool
-        except ImportError as e:
-            logger.error("Failed to import smolagents dependencies: %s", str(e))
-            raise ImportError(
-                f"Failed to import required modules for smolagents: {e}. Make sure the benchmark directory is in your path."
-            )
-
-        model_id = agent_config.get(
-            "model", "together_ai/meta-llama/Llama-3.3-70B-Instruct-Turbo")
-        logger.debug("Using model: %s", model_id)
-
-        import os
-        api_key = os.environ.get("TOGETHER_API_KEY")
-        if not api_key:
-            logger.error("TOGETHER_API_KEY not found in environment")
-            raise ValueError(
-                "API key not provided and TOGETHER_API_KEY not found in environment")
-
-        model = LiteLLMModel(model_id=model_id, api_key=api_key)
-        tools = []
-
-        if "tools" in agent_config:
-            tool_configs = agent_config.pop("tools")
-            for item in tool_configs:
-                if isinstance(item, str) and item == "TavilySearch":
-                    logger.debug("Adding TavilySearch tool")
-                    tools.append(SmolAgentsTavilySearchTool())
-                elif isinstance(item, dict):
-                    tool_name = list(item.keys())[0]
-                    if tool_name == "TavilySearch":
-                        params = item.get(tool_name, {}).get("params", {})
-                        logger.debug("Adding TavilySearch tool with params: %s", params)
-                        tools.append(SmolAgentsTavilySearchTool(**params))
-
-        tools.append(VisitWebpageTool())
-        logger.debug("Added VisitWebpageTool")
-        
-        agent = CodeAgent(
-            tools=tools,
-            model=model,
-            additional_authorized_imports=["numpy", "sympy"],
-            max_steps=10,
-        )
-        logger.info("Successfully initialized smolagents CodeAgent")
-
-        def smolagents_wrapper(goal: str):
-            logger.info("Running smolagents with goal: %s", goal)
             try:
-                result = agent.run(goal)
-                logger.info("Successfully completed smolagents run")
-                return result
-            except Exception as e:
-                logger.error("Smolagents run failed: %s", str(e), exc_info=True)
-                raise
+                return loop.run_until_complete(get_answer())
+            finally:
+                loop.close()
+        except Exception as e:
+            logger.error(f"Error in research: {e}")
+            return str(e)
 
+    def smolagents_wrapper(goal: str):
+        """Wrapper function to run research with smolagents."""
+        try:
+            return agent(goal)
+        except Exception as e:
+            logger.error(f"Error in research: {e}")
+            return str(e)
+
+    # Return the appropriate wrapper based on agent type
+    if agent_type == "deep_research":
+        return research_wrapper
+    elif agent_type == "langchain":
+        return langchain_wrapper
+    elif agent_type == "base_llm":
+        return base_llm_wrapper
+    elif agent_type == "smolagents":
         return smolagents_wrapper
-
     else:
-        logger.error("Unknown agent type: %s", agent_type)
         raise ValueError(f"Unknown agent type: {agent_type}")
 
 class DeepResearchAgent(MinionAgent):

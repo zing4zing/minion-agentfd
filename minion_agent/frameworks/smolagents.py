@@ -25,7 +25,7 @@ class SmolagentsAgent(MinionAgent):
     ):
         if not smolagents_available:
             raise ImportError(
-                "You need to `pip install 'minion-agent[smolagents]'` to use this agent"
+                "You need to `pip install 'minion-agent-x[smolagents]'` to use this agent"
             )
         self.managed_agents = managed_agents
         self.config = config

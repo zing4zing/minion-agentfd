@@ -29,7 +29,7 @@ class BrowserUseAgent(MinionAgent):
     ):
         if not browser_use_available:
             raise ImportError(
-                "You need to `pip install 'minion-agent[browser_use]'` to use this agent"
+                "You need to `pip install 'minion-agent-x[browser_use]'` to use this agent"
             )
         self.managed_agents = managed_agents
         self.config = config
