@@ -830,7 +830,7 @@ class DeepResearchAgent(MinionAgent):
 
     async def run_async(self, prompt: str) -> Any:
         """Run the Smolagents agent with the given prompt."""
-        result = awaitself._agent.research_topic(prompt)
+        result = await self._agent.research_topic(prompt)
         return result
 
     @property
