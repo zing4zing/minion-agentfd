@@ -9,7 +9,7 @@ A simple agent framework that's capable of browser use + mcp + auto instrument +
 ## Installation
 
 ```bash
-pip install minion-agent
+pip install minion-agent-x
 ```
 
 ## Usage
