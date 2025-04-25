@@ -32,6 +32,8 @@ class MinionAgent(ABC):
             from minion_agent.frameworks.minion import MinionBrainAgent as Agent
         elif agent_framework == AgentFramework.BROWSER_USE:
             from minion_agent.frameworks.browser_use import BrowserUseAgent as Agent
+        elif agent_framework == AgentFramework.DEEP_RESEARCH:
+            from minion_agent.frameworks.deep_research import DeepResearchAgent as Agent
         else:
             raise ValueError(f"Unsupported agent framework: {agent_framework}")
             
