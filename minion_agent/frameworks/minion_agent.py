@@ -48,7 +48,23 @@ class MinionAgent(ABC):
 
     def run(self, task: str) -> Any:
         """Run the agent with the given prompt."""
-        return asyncio.get_event_loop().run_until_complete(self.run_async(task))
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # 如果事件循环正在运行，我们需要在同一个循环中运行
+                # 使用 nest_asyncio 来允许嵌套的事件循环
+                import nest_asyncio
+                nest_asyncio.apply()
+            return loop.run_until_complete(self.run_async(task))
+        except RuntimeError:
+            # 如果没有事件循环，创建一个新的
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(self.run_async(task))
+            finally:
+                loop.close()
+
     def __call__(self, *args, **kwargs):
         #may be add some pre_prompt, post_prompt as being called as sub agents?
         return self.run(*args, **kwargs)

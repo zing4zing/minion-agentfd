@@ -44,6 +44,7 @@ minion = [
   "minionx>=0.0.1",
 ]
 deep-research = [
+    "nest_asyncio>=0.0.1",
     "pydantic",
     "litellm",
     "datasets",
