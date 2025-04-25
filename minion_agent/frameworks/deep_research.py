@@ -740,8 +740,8 @@ def create_agent(config: dict, return_instance: bool = False) -> Any:
         raise ValueError(f"Unknown agent type: {agent_type}")
 
 class DeepResearchAgent(MinionAgent):
-    """Smolagents agent implementation that handles both loading and running."""
-
+    name="deep_research"
+    description="Deep Research Agent"
     def __init__(
         self, config: AgentConfig, managed_agents: Optional[list[AgentConfig]] = None
     ):

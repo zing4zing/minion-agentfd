@@ -19,6 +19,11 @@ async def main():
                     "api_key": os.environ.get("AZURE_OPENAI_API_KEY"),
                     "api_version": os.environ.get("OPENAI_API_VERSION"),
                     },
+        model_type="AzureOpenAIServerModel",  # Updated to use our custom model
+        # model_type="CustomAzureOpenAIServerModel",  # Updated to use our custom model
+        agent_args={"additional_authorized_imports": "*",
+                    # "planning_interval":3
+                    },
         tools=[
             MCPTool(
                 command="npx",
