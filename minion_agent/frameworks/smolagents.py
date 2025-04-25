@@ -74,7 +74,11 @@ class SmolagentsAgent(MinionAgent):
                     managed_agents_instanced.append(managed_agent)
                     continue
                 if managed_agent.framework:
-                    agent = MinionAgent.create(managed_agent.framework, managed_agent)
+                    agent = await MinionAgent.create(managed_agent.framework, managed_agent)
+                    if managed_agent.name:
+                        agent.name = managed_agent.name
+                    if managed_agent.description:
+                        agent.description = managed_agent.description
                     managed_agents_instanced.append(agent)
                     continue
                 agent_type = getattr(

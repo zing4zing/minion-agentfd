@@ -41,17 +41,11 @@ async def main():
         description="A helpful research assistant that conducts deep research on topics",
     )
 
-    # Create the research agent
-    research_agent = await MinionAgent.create(
-        AgentFramework.DEEP_RESEARCH,
-        research_agent_config
-    )
-    
     # Create the main agent with the research agent as a managed agent
     main_agent = await MinionAgent.create(
         AgentFramework.SMOLAGENTS,
         main_agent_config,
-        managed_agents=[research_agent]
+        managed_agents=[research_agent_config]
     )
 
     # Example research query
