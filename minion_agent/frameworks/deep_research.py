@@ -712,7 +712,7 @@ class DeepResearchAgent(MinionAgent):
         return tools
 
     async def _load_agent(self) -> None:
-        """Load the Smolagents agent with the given configuration."""
+        """Load the agent instance."""
         logger.info("Loading agent")
 
         if not self.managed_agents and not self.config.tools:
@@ -739,7 +739,7 @@ class DeepResearchAgent(MinionAgent):
                             managed_agents_instanced.append(managed_agent)
                             continue
                         if managed_agent.framework:
-                            agent = MinionAgent.create(managed_agent.framework, managed_agent)
+                            agent = await MinionAgent.create(managed_agent.framework, managed_agent)
                             managed_agents_instanced.append(agent)
                             logger.debug("Created managed agent with framework: %s", managed_agent.framework)
                             continue
@@ -770,6 +770,26 @@ class DeepResearchAgent(MinionAgent):
                     except Exception as e:
                         logger.error("Failed to load managed agent: %s", str(e), exc_info=True)
                         raise
+
+            # Set default configuration if config.agent_args is empty
+            if not self.config.agent_args:
+                self.config.agent_args = {
+                    "type": "deep_researcher",
+                    "max_steps": 2,
+                    "max_queries": 5,
+                    "max_sources": 40,
+                    "max_completion_tokens": 8192,
+                    "user_timeout": 30.0,
+                    "interactive": True,
+                    "use_cache": True,
+                    "remove_thinking_tags": True,
+                    "debug_file_path": "",
+                    "planning_model": "together_ai/Qwen/Qwen2.5-72B-Instruct-Turbo",
+                    "summarization_model": "together_ai/meta-llama/Llama-3.3-70B-Instruct-Turbo",
+                    "json_model": "together_ai/meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+                    "answer_model": "together_ai/deepseek-ai/DeepSeek-V3"
+                }
+                logger.info("Using default deep research configuration")
 
             self._agent = create_agent(
                 config=self.config.agent_args or {},
