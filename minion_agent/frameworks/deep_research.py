@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Optional, Any, List
 
@@ -13,6 +12,7 @@ from minion_agent.frameworks.deep_research_types import (
     DeepResearchResults,
     UserCommunication
 )
+from loguru import logger
 
 import asyncio
 import hashlib
@@ -29,8 +29,6 @@ from typing import Callable, List
 import yaml
 from dotenv import load_dotenv
 from filelock import FileLock
-
-logger = logging.getLogger(__name__)
 
 try:
     deep_research_available = True
@@ -130,24 +128,24 @@ class DeepResearcher:
         else:
             clarified_topic = topic
 
-        logging.info(f"Topic: {clarified_topic}")
+        logger.info(f"Topic: {clarified_topic}")
 
         # Step 1: Generate initial queries
         self.observer(0.15, "Generating research queries")
         queries = await self.generate_research_queries(clarified_topic)
         queries = [clarified_topic] + queries[: self.max_queries - 1]
         all_queries = queries.copy()
-        logging.info(f"Initial queries: {queries}")
+        logger.info(f"Initial queries: {queries}")
         self.observer(0.2, "Research queries generated")
 
         if len(queries) == 0:
-            logging.error("No initial queries generated")
+            logger.error("No initial queries generated")
             return "No initial queries generated"
 
         # Step 2: Perform initial search
         self.observer(0.25, "Performing initial search")
         results = await self.search_all_queries(queries)
-        logging.info(f"Initial search complete, found {len(results.results)} results")
+        logger.info(f"Initial search complete, found {len(results.results)} results")
         self.observer(0.3, "Initial search complete")
 
         # Step 3: Conduct iterative research within budget
@@ -163,18 +161,18 @@ class DeepResearcher:
             # Filter out empty strings and check if any queries remain
             additional_queries = [q for q in additional_queries if q]
             if not additional_queries:
-                logging.info("No need for additional research")
+                logger.info("No need for additional research")
                 self.observer(progress + 0.05, "Research complete - no additional queries needed")
                 break
 
             # for debugging purposes we limit the number of queries
             additional_queries = additional_queries[: self.max_queries]
-            logging.info(f"Additional queries: {additional_queries}")
+            logger.info(f"Additional queries: {additional_queries}")
 
             # Expand research with new queries
             self.observer(progress + 0.02, f"Searching {len(additional_queries)} additional queries")
             new_results = await self.search_all_queries(additional_queries)
-            logging.info(f"Follow-up search complete, found {len(new_results.results)} results")
+            logger.info(f"Follow-up search complete, found {len(new_results.results)} results")
             self.observer(progress + 0.05, f"Found {len(new_results.results)} additional results")
 
             results = results + new_results
@@ -182,17 +180,17 @@ class DeepResearcher:
 
         # Step 4: Generate final answer with feedback loop
         self.observer(0.7, "Filtering and processing results")
-        logging.info(f"Generating final answer for topic: {clarified_topic}")
+        logger.info(f"Generating final answer for topic: {clarified_topic}")
         results = results.dedup()
-        logging.info(f"Deduplication complete, kept {len(results.results)} results")
+        logger.info(f"Deduplication complete, kept {len(results.results)} results")
         filtered_results, sources = await self.filter_results(clarified_topic, results)
-        logging.info(f"LLM Filtering complete, kept {len(filtered_results.results)} results")
+        logger.info(f"LLM Filtering complete, kept {len(filtered_results.results)} results")
         self.observer(0.8, f"Results filtered: kept {len(filtered_results.results)} sources")
 
         if self.debug_file_path:
             with open(self.debug_file_path, "w") as f:
                 f.write(f"{results}\n\n\n\n{filtered_results}")
-                logging.info(f"Debug file (web search results and sources) saved to {self.debug_file_path}")
+                logger.info(f"Debug file (web search results and sources) saved to {self.debug_file_path}")
 
         # Generate final answer
         self.observer(0.9, "Generating final research report")
@@ -203,7 +201,7 @@ class DeepResearcher:
                 self.observer(0.95, "Research complete")
                 return answer
 
-            logging.info(f"Answer: {answer}")
+            logger.info(f"Answer: {answer}")
             user_feedback = await self.communication.get_input_with_timeout(
                 "\nAre you satisfied with this answer? (yes/no) If no, please provide feedback: ",
                 self.user_timeout * TIME_LIMIT_MULTIPLIER,
@@ -214,7 +212,7 @@ class DeepResearcher:
 
             # Regenerate answer with user feedback
             clarified_topic = f"{clarified_topic}\n\nReport:{answer}\n\nAdditional Feedback: {user_feedback}"
-            logging.info(f"Regenerating answer with feedback: {user_feedback}")
+            logger.info(f"Regenerating answer with feedback: {user_feedback}")
             self.current_spending += 1
 
     async def clarify_topic(self, topic: str) -> str:
@@ -233,7 +231,7 @@ class DeepResearcher:
             model=self.planning_model, system_prompt=CLARIFICATION_PROMPT, message=f"Research Topic: {topic}"
         )
 
-        logging.info(f"\nTopic Clarification: {clarification}")
+        logger.info(f"\nTopic Clarification: {clarification}")
 
         while self.current_spending < self.budget:
             user_input = await self.communication.get_input_with_timeout(
@@ -258,7 +256,7 @@ class DeepResearcher:
                 message=f"Research Topic: {topic}\nPrevious Context: {self._clarification_context}",
             )
 
-            logging.info(f"\nFollow-up Clarification: {clarification}")
+            logger.info(f"\nFollow-up Clarification: {clarification}")
             self.current_spending += 1
 
         # helps typing
@@ -271,7 +269,7 @@ class DeepResearcher:
             model=self.planning_model, system_prompt=PLANNING_PROMPT, message=f"Research Topic: {topic}"
         )
 
-        logging.info(f"\n\nGenerated deep research plan for topic: {topic}\n\nPlan: {plan}\n\n")
+        logger.info(f"\n\nGenerated deep research plan for topic: {topic}\n\nPlan: {plan}\n\n")
 
         SEARCH_PROMPT = self.prompts["plan_parsing_prompt"]
 
@@ -332,7 +330,7 @@ class DeepResearcher:
                     with open(cache_path, "rb") as f:
                         return pickle.load(f)
         except Exception as e:
-            logging.warning(f"Failed to load cache for query '{query}': {e}")
+            logger.warning(f"Failed to load cache for query '{query}': {e}")
         return None
 
     async def search_all_queries(self, queries: List[str]) -> DeepResearchResults:
@@ -345,7 +343,7 @@ class DeepResearcher:
             # Try to load from cache first if caching is enabled
             cached_result = self._load_from_cache(query)
             if cached_result is not None:
-                logging.info(f"Using cached results for query: {query}")
+                logger.info(f"Using cached results for query: {query}")
                 cached_results.append(cached_result)
             else:
                 # If not in cache, create search task
@@ -377,11 +375,11 @@ class DeepResearcher:
         if len(query) > 400:
             # NOTE: we are truncating the query to 400 characters to avoid Tavily Search issues
             query = query[:400]
-            logging.info(f"Truncated query to 400 characters: {query}")
+            logger.info(f"Truncated query to 400 characters: {query}")
 
         response = await atavily_search_results(query)
 
-        logging.info("Tavily Search Called.")
+        logger.info("Tavily Search Called.")
 
         RAW_CONTENT_SUMMARIZER_PROMPT = self.prompts["raw_content_summarizer_prompt"]
 
@@ -415,7 +413,7 @@ class DeepResearcher:
 
     async def _summarize_content_async(self, raw_content: str, query: str, prompt: str) -> str:
         """Summarize content asynchronously using the LLM"""
-        logging.info("Summarizing content asynchronously using the LLM")
+        logger.info("Summarizing content asynchronously using the LLM")
 
         result = await asingle_shot_llm_call(
             model=self.summarization_model,
@@ -445,7 +443,7 @@ class DeepResearcher:
             ),
         )
 
-        logging.info(f"Evaluation: {evaluation}")
+        logger.info(f"Evaluation: {evaluation}")
 
         EVALUATION_PARSING_PROMPT = self.prompts["evaluation_parsing_prompt"]
 
@@ -478,7 +476,7 @@ class DeepResearcher:
             max_completion_tokens=4096,
         )
 
-        logging.info(f"Filter response: {filter_response}")
+        logger.info(f"Filter response: {filter_response}")
 
         FILTER_PARSING_PROMPT = self.prompts["filter_parsing_prompt"]
 
@@ -491,7 +489,7 @@ class DeepResearcher:
 
         sources = json.loads(response_json)["sources"]
 
-        logging.info(f"Filtered sources: {sources}")
+        logger.info(f"Filtered sources: {sources}")
 
         if self.max_sources != -1:
             sources = sources[: self.max_sources]
@@ -520,7 +518,7 @@ class DeepResearcher:
 
         # this is just to avoid typing complaints
         if answer is None or not isinstance(answer, str):
-            logging.error("No answer generated")
+            logger.error("No answer generated")
             return "No answer generated"
 
         if remove_thinking_tags:
@@ -828,8 +826,8 @@ class DeepResearchAgent(MinionAgent):
         if not self.managed_agents and not self.config.tools:
             logger.debug("No managed agents or tools configured, using default tools")
             self.config.tools = [
-                "minion_agent.tools.search_web",
-                "minion_agent.tools.visit_webpage",
+                "minion_agent.tools.web_browsing.search_web",
+                "minion_agent.tools.web_browsing.visit_webpage",
             ]
 
         try:

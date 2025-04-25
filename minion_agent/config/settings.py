@@ -100,7 +100,7 @@ class LoggingSettings(BaseModel):
 
 
 class Settings(BaseModel):
-    """Settings for Minion-Manus."""
+    """Settings for Minion-Agent."""
     
     browser: BrowserSettings = Field(
         default_factory=BrowserSettings,

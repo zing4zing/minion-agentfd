@@ -1,11 +1,9 @@
-import logging
 from typing import Any, Optional
 
 import tenacity
 from litellm import acompletion, completion
 from together import Together
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_exponential(multiplier=1, min=4, max=15))
 async def asingle_shot_llm_call(
