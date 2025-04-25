@@ -13,6 +13,18 @@ async def main():
     )
     main_agent_config = AgentConfig(
         model_id=os.environ.get("AZURE_DEPLOYMENT_NAME"),
+        name="main_agent",
+        description="main agent",
+        model_args={"azure_endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
+                    "api_key": os.environ.get("AZURE_OPENAI_API_KEY"),
+                    "api_version": os.environ.get("OPENAI_API_VERSION"),
+                    },
+        tools=[
+        ],
+    )
+    research_agent_config = AgentConfig(
+        framework=AgentFramework.DEEP_RESEARCH,
+        model_id=os.environ.get("AZURE_DEPLOYMENT_NAME"),
         name="research_assistant",
         description="A helpful research assistant",
         model_args={"azure_endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
@@ -20,32 +32,16 @@ async def main():
                     "api_version": os.environ.get("OPENAI_API_VERSION"),
                     },
         tools=[
-            # "minion_agent.tools.browser_tool.browser",
-            MCPTool(
-                command="npx",
-                args=["-y", "@modelcontextprotocol/server-filesystem", "/Users/femtozheng/workspace",
-                      "/Users/femtozheng/python-project/minion-agent"]
-            )
         ],
-
-    # Initialize the deep research agent
-    research_agent = DeepResearchAgent(
-        config=config,
-        together_api_key=os.getenv("TOGETHER_API_KEY")
+    )
+    main_agent = MinionAgent.create(
+        AgentFramework.SMOLAGENTS,
+        managed_agents=[research_agent_config],
     )
 
     # Example research query
     research_query = """
-    Research Topic: The current state and future potential of quantum computing
-    
-    Please investigate:
-    1. Recent breakthroughs in quantum computing technology
-    2. Major players and their approaches
-    3. Current limitations and challenges
-    4. Potential applications across industries
-    5. Timeline predictions for practical quantum computers
-    
-    Focus on verified sources and provide a comprehensive analysis.
+    The evolution of Indo-European languages
     """
 
     try:

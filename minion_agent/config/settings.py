@@ -29,6 +29,7 @@ class AgentFramework(str, Enum):
     SMOLAGENTS = "smolagents"
     MINION = "minion"
     BROWSER_USE = "browser_use"
+    DEEP_RESEARCH = "deep_research"
 
 
 class MCPTool(BaseModel):
@@ -39,7 +40,7 @@ class MCPTool(BaseModel):
 class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     model_id: str
-    name: str = "Minion-Manus"
+    name: str = "Minion-Agent"
     instructions: str | None = None
     tools: list[str | MCPTool] = Field(default_factory=list)
     handoff: bool = False
@@ -48,6 +49,9 @@ class AgentConfig(BaseModel):
     model_type: str | None = None
     model_args: dict | None = None
     description: str | None = None
+
+
+    framework: str | None = None
 
 
 class BrowserSettings(BaseModel):
