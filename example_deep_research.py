@@ -61,11 +61,11 @@ async def main():
         print(result)
         
         # Save the results to a file
-        output_path = "research_results.md"
-        with open(output_path, "w") as f:
-            f.write(result)
-        
-        print(f"\nResults saved to {output_path}")
+        # output_path = "research_results.md"
+        # with open(output_path, "w") as f:
+        #     f.write(result)
+        #
+        # print(f"\nResults saved to {output_path}")
         
     except Exception as e:
         print(f"Error during research: {str(e)}")
