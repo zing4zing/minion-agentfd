@@ -39,7 +39,7 @@ except ImportError:
 from typing import Any
 
 import yaml
-
+TIME_LIMIT_MULTIPLIER = 5
 def load_config(config_path: str):
     with open(config_path, "r") as file:
         return yaml.safe_load(file)
