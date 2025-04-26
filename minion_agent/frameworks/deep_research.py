@@ -452,7 +452,10 @@ class DeepResearcher:
             model=self.json_model,
             system_prompt=EVALUATION_PARSING_PROMPT,
             message=f"Evaluation to be parsed: {evaluation}",
-            response_format={"type": "json_object", "schema": ResearchPlan.model_json_schema()},
+
+            #response_format={"type": "json_object", "schema": ResearchPlan.model_json_schema()},
+            response_format={"type": "json_schema",
+                             "json_schema": {"name": "ResearchPlan", "schema": ResearchPlan.model_json_schema()}},
         )
 
         evaluation = json.loads(response_json)
@@ -485,7 +488,9 @@ class DeepResearcher:
             model=self.json_model,
             system_prompt=FILTER_PARSING_PROMPT,
             message=f"Filter response to be parsed: {filter_response}",
-            response_format={"type": "json_object", "schema": SourceList.model_json_schema()},
+
+            #response_format={"type": "json_object", "schema": SourceList.model_json_schema()},
+            response_format={"type": "json_schema", "json_schema": {"name":"SourceList", "schema":ResearchPlan.model_json_schema()}},
         )
 
         sources = json.loads(response_json)["sources"]
