@@ -81,7 +81,7 @@ agent_config = AgentConfig(
     #model_type="CustomAzureOpenAIServerModel",  # Updated to use our custom model
     agent_args={"additional_authorized_imports":"*",
                 #"planning_interval":3
-"step_callbacks":[save_screenshot]
+#"step_callbacks":[save_screenshot]
                 }
 )
 managed_agents = [

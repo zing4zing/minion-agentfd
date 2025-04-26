@@ -4,8 +4,7 @@ from typing import Optional
 import pypandoc
 from pymdownx.superfences import SuperFencesCodeExtension
 
-
-def generate_pdf(answer: str, filename: str = "research_report.pdf"):
+def generate_pdf(answer: str, filename: str = "research_report.pdf") -> None:
     """
     Generate a PDF report from the markdown formatted research answer.
     Uses the first line of the answer as the title.
@@ -13,6 +12,11 @@ def generate_pdf(answer: str, filename: str = "research_report.pdf"):
     Attempts to use pypandoc first, with fallbacks to:
     1. commonmark + xhtml2pdf if pypandoc fails
     2. A clear error message if all methods fail
+    Args:
+        answer: Markdown-formatted research content
+        filename: Output PDF filename
+    Returns:
+        None. Writes PDF to file.
     """
     # Extract the first line as title and rest as content
     lines = answer.split("\n")
@@ -105,24 +109,26 @@ def generate_html(
     """
     Generate an HTML report from markdown formatted content.
     Returns the generated HTML as a string.
+    Args:
+        markdown_content: Markdown-formatted content
+        toc_image_url: Optional image URL for the TOC/header
+        title: Optional report title
+        base64_audio: Optional base64-encoded audio for embedding
+    Returns:
+        HTML string
     """
     try:
         import datetime
-
         import markdown
-
         year = datetime.datetime.now().year
         month = datetime.datetime.now().strftime("%B")
         day = datetime.datetime.now().day
-
         # Extract title from first line if not provided
         lines = markdown_content.split("\n")
         if not title:
             # Remove any markdown heading characters
             title = lines[0].strip("# ")
-
         content = markdown_content
-
         # Convert markdown to HTML with table support
         html_body = markdown.markdown(
             content,
@@ -132,45 +138,34 @@ def generate_html(
                 SuperFencesCodeExtension(custom_fences=[{"name": "mermaid", "class": "mermaid", "format": fence_mermaid}]),
             ],
         )
-
         # Add mermaid header
-        mermaid_header = """<script type="module">
-                import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-                mermaid.initialize({startOnLoad: true });
-            </script>"""
-
+        mermaid_header = """<script type=\"module\">\n                import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';\n                mermaid.initialize({startOnLoad: true });\n            </script>"""
         # Directly parse HTML to extract headings and build TOC
-        heading_pattern = re.compile(r'<h([2-3])(?:\s+id="([^"]+)")?>([^<]+)</h\1>')
+        heading_pattern = re.compile(r'<h([2-3])(?:\\s+id="([^"]+)")?>([^<]+)</h\\1>')
         toc_items = []
         section_count = 0
         subsection_counts = {}
-
         # First pass: Add IDs to all headings that don't have them
         modified_html = html_body
         for match in heading_pattern.finditer(html_body):
             level = match.group(1)
             heading_id = match.group(2)
             heading_text = match.group(3)
-
             # If heading doesn't have an ID, create one and update the HTML
             if not heading_id:
-                heading_id = re.sub(r"[^\w\-]", "-", heading_text.lower())
+                heading_id = re.sub(r"[^\\w\-]", "-", heading_text.lower())
                 heading_id = re.sub(r"-+", "-", heading_id).strip("-")
-
                 # Replace the heading without ID with one that has an ID
                 original = f"<h{level}>{heading_text}</h{level}>"
                 replacement = f'<h{level} id="{heading_id}">{heading_text}</h{level}>'
                 modified_html = modified_html.replace(original, replacement)
-
         # Update the HTML body with the added IDs
         html_body = modified_html
-
         # Second pass: Build the TOC items
         for match in heading_pattern.finditer(modified_html):
             level = match.group(1)
-            heading_id = match.group(2) or re.sub(r"[^\w\-]", "-", match.group(3).lower())
+            heading_id = match.group(2) or re.sub(r"[^\\w\-]", "-", match.group(3).lower())
             heading_text = match.group(3)
-
             if level == "2":  # Main section (h2)
                 section_count += 1
                 subsection_counts[section_count] = 0
@@ -182,25 +177,23 @@ def generate_html(
                 toc_items.append(
                     f'<a class="nav-link py-1 ps-3" href="#{heading_id}">{parent_section}.{subsection_num}. {heading_text}</a>'
                 )
-
         current_date = datetime.datetime.now().strftime("%B %Y")
-
         # Create a complete HTML document with enhanced styling and structure
         html_doc = f"""
         <!DOCTYPE html>
-        <html lang="en">
+        <html lang=\"en\">
         <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta charset=\"UTF-8\">
+            <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
             <title>{title}</title>
-            <base target="_self">
-            <meta name="author" content="Research Report">
-            <meta name="description" content="Comprehensive research report">
+            <base target=\"_self\">
+            <meta name=\"author\" content=\"Research Report\">
+            <meta name=\"description\" content=\"Comprehensive research report\">
             <!-- Bootstrap CSS -->
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
             <!-- DataTables CSS -->
-            <link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+            <link href=\"https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css\" rel=\"stylesheet\">
+            <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css\">
             {mermaid_header}
             <style>
                 body {{
@@ -394,7 +387,7 @@ def generate_html(
                             decisions based on this content.
                         </p>
                     </div>
-                    {f'<div class="audio-container">'
+                    {f'<div class="audio-container>'
                      f'<i class="bi bi-music-note-beamed"></i>'
                      f'<audio controls>'
                      f'<source src="{base64_audio}" type="audio/mp3">'
@@ -451,9 +444,7 @@ def generate_html(
         </body>
         </html>
         """
-
         return html_doc
-
     except Exception as error:
         error_msg = f"HTML conversion failed: {str(error)}"
         raise Exception(error_msg)
@@ -469,22 +460,26 @@ def save_and_generate_html(
     """
     Generate an HTML report from markdown formatted content and save it to a file if filename is provided.
     Returns the generated HTML.
+    Args:
+        markdown_content: Markdown-formatted content
+        filename: Output HTML filename (optional)
+        toc_image_url: Optional image URL for the TOC/header
+        title: Optional report title
+        base64_audio: Optional base64-encoded audio for embedding
+    Returns:
+        HTML string
     """
     # Generate the HTML content
     html_doc = generate_html(markdown_content, toc_image_url, title, base64_audio)
-
     # Save to file if filename is provided
     if filename:
         # Ensure the filename has an .html extension
         if not filename.lower().endswith(".html"):
             filename += ".html"
-
         with open(filename, "w", encoding="utf-8") as f:
             f.write(html_doc)
         print(f"HTML report generated successfully: {filename}")
-
     return html_doc
-
 
 def fence_mermaid(source, language, css_class, options, md, **kwargs):
     """Clean and process mermaid code blocks."""
