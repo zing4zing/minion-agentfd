@@ -277,7 +277,8 @@ class DeepResearcher:
             model=self.json_model,
             system_prompt=SEARCH_PROMPT,
             message=f"Plan to be parsed: {plan}",
-            response_format={"type": "json_object", "schema": ResearchPlan.model_json_schema()},
+            #response_format={"type": "json_object", "schema": ResearchPlan.model_json_schema()},
+            response_format={"type": "json_schema", "json_schema": {"name":"ResearchPlan", "schema":ResearchPlan.model_json_schema()}},
         )
 
         plan = json.loads(response_json)

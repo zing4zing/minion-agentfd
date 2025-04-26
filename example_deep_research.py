@@ -1,5 +1,7 @@
 import asyncio
 import os
+
+import litellm
 from dotenv import load_dotenv
 from minion_agent.config import AgentConfig, AgentFramework, MCPTool
 from minion_agent import MinionAgent
@@ -32,13 +34,19 @@ async def main():
             )
         ],
     )
-
+    #litellm._turn_on_debug()
     # Configure the deep research agent
     research_agent_config = AgentConfig(
         framework=AgentFramework.DEEP_RESEARCH,
         model_id=os.environ.get("AZURE_DEPLOYMENT_NAME"),
         name="research_assistant",
         description="A helpful research assistant that conducts deep research on topics",
+        agent_args={
+            "planning_model": "azure/" + os.environ.get("AZURE_DEPLOYMENT_NAME"),
+            "summarization_model": "azure/" + os.environ.get("AZURE_DEPLOYMENT_NAME"),
+            "json_model": "azure/" + os.environ.get("AZURE_DEPLOYMENT_NAME"),
+            "answer_model": "azure/" + os.environ.get("AZURE_DEPLOYMENT_NAME")
+        }
     )
 
     # Create the main agent with the research agent as a managed agent
