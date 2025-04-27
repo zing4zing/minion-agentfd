@@ -89,12 +89,7 @@ from minion_agent.config import MCPTool
 agent_config = AgentConfig(
     # ... other config options ...
     tools=[
-        MCPTool({
-            "url": "http://localhost:8000/sse",  # SSE endpoint URL
-            "headers": {  # Optional headers
-                "Authorization": "Bearer your-token"
-            }
-        })
+        MCPTool({"url": "http://localhost:8000/sse"}),  # SSE-based tool
     ]
 )
 ```
@@ -156,6 +151,10 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
+## Deep Research
+
+See [Deep Research Documentation](docs/deep_research.md) for usage instructions.
+
 ## Community
 
 Join our WeChat discussion group to connect with other users and get help:
@@ -167,3 +166,5 @@ Join our WeChat discussion group to connect with other users and get help:
 ## License
 
 MIT License
+
+
