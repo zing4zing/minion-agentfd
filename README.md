@@ -23,22 +23,31 @@ pip install -e .
 Here's a simple example of how to use Minion Agent:
 
 ```python
-from minion_agent import MinionAgent, AgentConfig
+from minion_agent import MinionAgent, AgentConfig, AgentFramework
+from dotenv import load_dotenv
+import os
 
-# Configure the agent
-agent_config = AgentConfig(
-    model_id="gpt-4o",  # or your preferred model
-    name="Research Assistant",
-    description="A helpful research assistant",
-    model_args={"api_key_var": "OPENAI_API_KEY"}  # Will use OPENAI_API_KEY from environment
-)
+load_dotenv()
+async def main():
+    # Configure the agent
+    agent_config = AgentConfig(
+        model_id=os.environ.get("AZURE_DEPLOYMENT_NAME"),
+        name="research_assistant",
+        description="A helpful research assistant",
+        model_args={"azure_endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
+                    "api_key": os.environ.get("AZURE_OPENAI_API_KEY"),
+                    "api_version": os.environ.get("OPENAI_API_VERSION"),
+                    },
+        model_type="AzureOpenAIServerModel",  # use "AzureOpenAIServerModel" for auzre, use "OpenAIServerModel" for openai, use "LiteLLMModel" for litellm
+    )
 
-# Create and run the agent
-agent = MinionAgent(agent_config)
+    agent = await MinionAgent.create(AgentFramework.SMOLAGENTS, agent_config)
 
-# Run the agent with a question
-result = agent.run("What are the latest developments in AI?")
-print("Agent's response:", result)
+    # Run the agent with a question
+    result = agent.run("What are the latest developments in AI?")
+    print("Agent's response:", result)
+import asyncio
+asyncio.run(main())
 ```
 
 see example.py
