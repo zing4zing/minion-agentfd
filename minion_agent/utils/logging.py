@@ -1,5 +1,5 @@
 """
-Logging utilities for Minion-Manus.
+Logging utilities for Minion-Agent.
 
 This module provides utilities for setting up logging.
 """
