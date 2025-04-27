@@ -6,6 +6,12 @@
 
 A simple agent framework that's capable of browser use + mcp + auto instrument + plan + deep research
 
+## 🎬 Demo Videos
+
+- [Compare Price Demo](https://youtu.be/O0RhA3eeDlg)
+- [Deep Research Demo](https://youtu.be/tOd56nagsT4)
+- [Generating Snake Game Demo](https://youtu.be/UBquRXD9ZJc)
+
 ## Installation
 
 ```bash
