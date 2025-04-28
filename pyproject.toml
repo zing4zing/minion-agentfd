@@ -1,6 +1,6 @@
 [project]
 name = "minion-agent-x"
-version = "0.1.2"
+version = "0.1.3"
 description = "An enhanced version of minion-agent with extended capabilities"
 authors = [
     {name = "femtozheng", email = "femtozheng@example.com"},
@@ -42,6 +42,7 @@ openai = [
 ]
 minion = [
   "minionx>=0.0.1",
+  "nltk>=0.0.1"
 ]
 deep-research = [
     "nest_asyncio>=0.0.1",

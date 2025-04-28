@@ -7,9 +7,9 @@ from minion_agent.tools.wrappers import import_and_wrap_tools
 
 try:
     import minion
-
+    from minion.main.brain import Brain
     minion_available = True
-except ImportError:
+except ImportError as e:
     minion_available = None
 
 
@@ -89,11 +89,9 @@ class MinionBrainAgent(MinionAgent):
                     )
                 managed_agents_instanced.append(managed_agent_instance)
 
-        main_agent_type = getattr(
-            smolagents, self.config.agent_type or DEFAULT_AGENT_TYPE
-        )
+        main_agent_type = Brain
 
-        self._agent: MultiStepAgent = main_agent_type(
+        self._agent = main_agent_type(
             name=self.config.name,
             model=self._get_model(self.config),
             tools=tools,
