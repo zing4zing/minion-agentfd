@@ -4,7 +4,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/femtowin?style=social)](https://x.com/femtowin)**
 # Minion Agent
 
-A simple agent framework that's capable of browser use + mcp + auto instrument + plan + deep research
+A simple agent framework that's capable of browser use + mcp + auto instrument + plan + deep research + more
 
 ## 🎬 Demo Videos
 
