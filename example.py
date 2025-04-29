@@ -135,7 +135,7 @@ async def main():
         #result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
         #result = await agent.run("打开微信公众号")
         #result = await agent.run("搜索最新的人工智能发展趋势，并且总结为markdown")
-        result = await agent.run("go visit https://www.baidu.com and clone it")
+        result = agent.run("go visit https://www.baidu.com and clone it")
         #result = await agent.run("复刻一个电商网站,例如京东")
         #result = await agent.run("go visit https://www.baidu.com , take a screenshot and clone it")
         #result = await agent.run("实现一个贪吃蛇游戏")
