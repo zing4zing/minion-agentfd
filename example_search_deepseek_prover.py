@@ -74,7 +74,10 @@ agent_config = AgentConfig(
         MCPTool(
             command="npx",
             args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace","/Users/femtozheng/python-project/minion-agent"]
-        )
+        ),
+            "minion_agent.tools.generation.generate_pdf",
+            "minion_agent.tools.generation.generate_html",
+            "minion_agent.tools.generation.save_and_generate_html",
     ],
     agent_type="CodeAgent",
     model_type="AzureOpenAIServerModel",  # Updated to use our custom model
@@ -132,14 +135,16 @@ async def main():
 
         # Run the agent with a question
         #result = await agent.run("search sam altman and export summary as markdown")
-        result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
+        #result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
         #result = await agent.run("打开微信公众号")
         #result = await agent.run("搜索最新的人工智能发展趋势，并且总结为markdown")
         #result = agent.run("go visit https://www.baidu.com and clone it")
+        result = agent.run("搜索Deepseek prover的最新消息，汇总成一个html, 你的html应该尽可能美观,然后保存html到磁盘上")
         #result = await agent.run("复刻一个电商网站,例如京东")
         #result = await agent.run("go visit https://www.baidu.com , take a screenshot and clone it")
         #result = await agent.run("实现一个贪吃蛇游戏")
         print("Agent's response:", result)
+        print("done")
     except Exception as e:
         print(f"Error: {str(e)}")
         # 如果需要调试
