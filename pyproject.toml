@@ -41,7 +41,7 @@ openai = [
   "openinference-instrumentation-openai-agents>=0.1.5"
 ]
 minion = [
-  "minionx>=0.0.1",
+  "minionx>=0.1.1",
   "nltk>=0.0.1"
 ]
 deep-research = [

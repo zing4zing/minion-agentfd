@@ -58,7 +58,7 @@ async def main():
 
     # Example research query
     research_query = """
-    Research The evolution of Indo-European languages, and save the results to a markdown file.
+    Research The evolution of Indo-European languages, and generate a pdf out of it.
     """
 
     try:

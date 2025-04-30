@@ -8,6 +8,9 @@ from minion_agent.tools.wrappers import import_and_wrap_tools
 try:
     import minion
     from minion.main.brain import Brain
+    from minion.providers import create_llm_provider
+    from minion import config as minion_config
+    from minion.main.local_python_env import LocalPythonEnv
     minion_available = True
 except ImportError as e:
     minion_available = None
@@ -32,15 +35,28 @@ class MinionBrainAgent(MinionAgent):
         self._managed_mcp_servers = None
 
     def _get_model(self, agent_config: AgentConfig):
-        """Get the model configuration for a smolagents agent."""
-        model_type = getattr(smolagents, agent_config.model_type or DEFAULT_MODEL_CLASS)
-        kwargs = {
-            "model_id": agent_config.model_id,
-        }
-        model_args = agent_config.model_args or {}
-        if api_key_var := model_args.pop("api_key_var", None):
-            kwargs["api_key"] = os.environ[api_key_var]
-        return model_type(**kwargs, **model_args)
+        """Get the model configuration for a minion agent.
+        
+        Args:
+            agent_config: The agent configuration containing model settings
+            
+        Returns:
+            A minion provider instance configured with the specified model
+        """
+        # Get model ID from config or use default
+        model_id = agent_config.model_id or "gpt-4o"
+        
+        # Get model config from minion's config
+        llm_config = minion_config.models.get(model_id)
+        if not llm_config:
+            raise ValueError(f"Model {model_id} not found in minion config")
+            
+        # Create provider with model args from agent config
+        provider = create_llm_provider(
+            llm_config
+        )
+        
+        return provider
 
     def _merge_mcp_tools(self, mcp_servers):
         """Merge MCP tools from different servers."""
@@ -50,8 +66,7 @@ class MinionBrainAgent(MinionAgent):
         return tools
 
     async def _load_agent(self) -> None:
-        """Load the Smolagents agent with the given configuration."""
-
+        """Load the agent instance with the given configuration."""
         if not self.managed_agents and not self.config.tools:
             self.config.tools = [
                 "minion_agent.tools.search_web",
@@ -91,22 +106,20 @@ class MinionBrainAgent(MinionAgent):
 
         main_agent_type = Brain
 
+        # Get python_env from config or use default
+        agent_args = self.config.agent_args or {}
+        python_env = agent_args.pop('python_env', None) or LocalPythonEnv(verbose=False)
+
         self._agent = main_agent_type(
-            name=self.config.name,
-            model=self._get_model(self.config),
-            tools=tools,
-            verbosity_level=2,  # OFF
-            managed_agents=managed_agents_instanced,
-            **self.config.agent_args or {},
+            python_env=python_env,
+            llm=self._get_model(self.config),
+            **agent_args
         )
 
-        if self.config.instructions:
-            self._agent.prompt_templates["system_prompt"] = self.config.instructions
-
-    async def run_async(self, prompt: str) -> Any:
+    async def run_async(self, task: str,*args,**kwargs) -> Any:
         """Run the Smolagents agent with the given prompt."""
-        result = self._agent.run(prompt)
-        return result
+        obs, *_ = await self._agent.step(query=task, *args, **kwargs)
+        return obs
 
     @property
     def tools(self) -> List[str]:

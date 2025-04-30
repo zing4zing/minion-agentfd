@@ -1,6 +1,8 @@
 import os
 from typing import Optional, Any, List
 
+
+
 from minion_agent.config import AgentFramework, AgentConfig
 from minion_agent.frameworks.minion_agent import MinionAgent
 from minion_agent.tools.wrappers import import_and_wrap_tools
@@ -8,7 +10,9 @@ from minion_agent.tools.wrappers import import_and_wrap_tools
 try:
     import smolagents
     from smolagents import MultiStepAgent
+    from smolagents.local_python_executor import BASE_PYTHON_TOOLS
 
+    BASE_PYTHON_TOOLS["open"] = open
     smolagents_available = True
 except ImportError:
     smolagents_available = None

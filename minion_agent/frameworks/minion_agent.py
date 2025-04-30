@@ -46,7 +46,7 @@ class MinionAgent(ABC):
         """Load the agent instance."""
         pass
 
-    def run(self, task: str) -> Any:
+    def run(self, task: str,*args,**kwargs) -> Any:
         """Run the agent with the given prompt."""
         try:
             loop = asyncio.get_event_loop()
@@ -55,13 +55,13 @@ class MinionAgent(ABC):
                 # 使用 nest_asyncio 来允许嵌套的事件循环
                 import nest_asyncio
                 nest_asyncio.apply()
-            return loop.run_until_complete(self.run_async(task))
+            return loop.run_until_complete(self.run_async(task,*args,**kwargs))
         except RuntimeError:
             # 如果没有事件循环，创建一个新的
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                return loop.run_until_complete(self.run_async(task))
+                return loop.run_until_complete(self.run_async(task,*args,**kwargs))
             finally:
                 loop.close()
 
@@ -70,7 +70,7 @@ class MinionAgent(ABC):
         return self.run(*args, **kwargs)
 
     @abstractmethod
-    async def run_async(self, task: str) -> Any:
+    async def run_async(self, task: str,*args,**kwargs) -> Any:
         """Run the agent asynchronously with the given prompt."""
         pass
 
