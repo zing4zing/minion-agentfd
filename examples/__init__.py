@@ -1,5 +1,5 @@
 """
-Examples for Minion-Manus.
+Examples for Minion-Agent.
 
-This package contains example applications using the Minion-Manus framework.
+This package contains example applications using the Minion-Agent framework.
 """ 

@@ -71,13 +71,14 @@ agent_config = AgentConfig(
                 },
     tools=[
         "minion_agent.tools.browser_tool.browser",
+        "minion_agent.tools.generation.generate_pdf",
+        "minion_agent.tools.generation.generate_html",
+        "minion_agent.tools.generation.save_and_generate_html",
         MCPTool(
             command="npx",
             args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace","/Users/femtozheng/python-project/minion-agent"]
         ),
-            "minion_agent.tools.generation.generate_pdf",
-            "minion_agent.tools.generation.generate_html",
-            "minion_agent.tools.generation.save_and_generate_html",
+
     ],
     agent_type="CodeAgent",
     model_type="AzureOpenAIServerModel",  # Updated to use our custom model
