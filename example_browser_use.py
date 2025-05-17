@@ -35,14 +35,14 @@ async def main():
     agent = await MinionAgent.create(AgentFramework.BROWSER_USE, config)
 
     # Run the agent with a specific task
-    # result = await agent.run_async("Compare the price of gpt-4o and DeepSeek-V3 and create a detailed comparison table")
-    # print("Task Result:", result)
+    result = await agent.run_async("Compare the price of gpt-4o and DeepSeek-V3 and create a detailed comparison table")
+    print("Task Result:", result)
     #
     # # Run another task
     # result = await agent.run_async("Go to baidu.com, search for '人工智能最新进展', and summarize the top 3 results")
     # print("Task Result:", result)
-    result = await agent.run_async("打开微信公众号，发表一篇hello world")
-    print("Task Result:", result)
+    #result = await agent.run_async("打开微信公众号，发表一篇hello world")
+    #print("Task Result:", result)
 
 if __name__ == "__main__":
     # Verify environment variables
