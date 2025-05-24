@@ -26,10 +26,11 @@ async def main():
                 "api_version": os.environ.get("OPENAI_API_VERSION"),
                 },
     tools=[
-        #"minion_agent.tools.browser_tool.browser",
+        "minion_agent.tools.browser_tool.browser",
         MCPTool(
             command="npx",
-            args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace","/Users/femtozheng/python-project/minion-agent"]
+            args=["-y", "@modelcontextprotocol/server-filesystem","/Users/femtozheng/workspace","/Users/femtozheng/python-project/minion-agent",
+                  "/Users/femtozheng/space/minion/minion"]
         )
     ],
     agent_type="CodeAgent",
@@ -71,9 +72,9 @@ async def main():
         #"Visit baidu.com, take a screenshot, and save it to the workspace",
         #"browse baidu.com and clone it",
         #"browse jd.com and clone it",
-        "请使用browser use 打开微信公众号，发表一篇关于人工智能时代的思考",
+        #"请使用browser use 打开微信公众号，发表一篇关于人工智能时代的思考",
         #"复刻一个电商网站"
-        # "Compare GPT-4 and Claude pricing, create a comparison table, and save it as a markdown document"
+        "Compare GPT-4 and Claude pricing, create a comparison table, and save it as a markdown document"
     ]
 
     for task in tasks:

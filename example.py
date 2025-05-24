@@ -112,17 +112,17 @@ agent_type="ToolCallingAgent",
     # )
 ]
 
-from opentelemetry.sdk.trace import TracerProvider
-
-from openinference.instrumentation.smolagents import SmolagentsInstrumentor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-
-otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
-trace_provider = TracerProvider()
-trace_provider.add_span_processor(SimpleSpanProcessor(otlp_exporter))
-
-SmolagentsInstrumentor().instrument(tracer_provider=trace_provider)
+# from opentelemetry.sdk.trace import TracerProvider
+#
+# from openinference.instrumentation.smolagents import SmolagentsInstrumentor
+# from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+# from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+#
+# otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
+# trace_provider = TracerProvider()
+# trace_provider.add_span_processor(SimpleSpanProcessor(otlp_exporter))
+#
+# SmolagentsInstrumentor().instrument(tracer_provider=trace_provider)
 
 async def main():
     try:
@@ -131,14 +131,19 @@ async def main():
         agent = await MinionAgent.create(AgentFramework.SMOLAGENTS, agent_config)
 
         # Run the agent with a question
-        #result = await agent.run("search sam altman and export summary as markdown")
-        result = await agent.run("What are the latest developments in AI, find this information and export as markdown")
-        #result = await agent.run("打开微信公众号")
-        #result = await agent.run("搜索最新的人工智能发展趋势，并且总结为markdown")
+        #result = await agent.run_async("search sam altman and export summary as markdown")
+        #result = await agent.run_async("What are the latest developments in AI, find this information and export as markdown")
+        #result = await agent.run_async("打开微信公众号")
+        #result = await agent.run_async("搜索最新的人工智能发展趋势，并且总结为markdown")
         #result = agent.run("go visit https://www.baidu.com and clone it")
-        #result = await agent.run("复刻一个电商网站,例如京东")
-        #result = await agent.run("go visit https://www.baidu.com , take a screenshot and clone it")
-        #result = await agent.run("实现一个贪吃蛇游戏")
+        #result = await agent.run_async("复刻一个电商网站,例如京东")
+        #result = await agent.run_async("go visit https://www.baidu.com , take a screenshot and clone it")
+        #result = await agent.run_async("实现一个贪吃蛇游戏")
+        #result = agent.run("Let $\mathcal{B}$ be the set of rectangular boxes with surface area $54$ and volume $23$. Let $r$ be the radius of the smallest sphere that can contain each of the rectangular boxes that are elements of $\mathcal{B}$. The value of $r^2$ can be written as $\frac{p}{q}$, where $p$ and $q$ are relatively prime positive integers. Find $p+q$.")
+        result = agent.run("Write a 500000 characters novel named 'Reborn in Skyrim'. "
+              "Fill the empty nodes with your own ideas. Be creative! Use your own words!"
+              "I will tip you $100,000 if you write a good novel."
+              "Since the novel is very long, you may need to divide it into subtasks.")
         print("Agent's response:", result)
     except Exception as e:
         print(f"Error: {str(e)}")
