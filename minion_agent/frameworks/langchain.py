@@ -1,10 +1,10 @@
 import importlib
 from typing import Any, Optional, List
 
-from any_agent.config import AgentFramework, AgentConfig
-from any_agent.frameworks.any_agent import AnyAgent
-from any_agent.logging import logger
-from any_agent.tools.wrappers import import_and_wrap_tools
+from minion_agent.config import AgentFramework, AgentConfig
+from minion_agent.frameworks.minion_agent import MinionAgent
+from minion_agent.logging import logger
+from minion_agent.tools.wrappers import import_and_wrap_tools
 
 try:
     from langgraph.prebuilt import create_react_agent
@@ -18,7 +18,7 @@ except ImportError:
 DEFAULT_MODEL_CLASS = "langchain_litellm.ChatLiteLLM"
 
 
-class LangchainAgent(AnyAgent):
+class LangchainAgent(MinionAgent):
     """LangChain agent implementation that handles both loading and running."""
 
     def __init__(
@@ -49,8 +49,8 @@ class LangchainAgent(AnyAgent):
 
         if not self.config.tools:
             self.config.tools = [
-                "any_agent.tools.search_web",
-                "any_agent.tools.visit_webpage",
+                "minion_agent.tools.search_web",
+                "minion_agent.tools.visit_webpage",
             ]
 
         if self.managed_agents:

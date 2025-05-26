@@ -85,7 +85,7 @@ class MinionAgent(ABC):
 
     def __init__(self):
         raise NotImplementedError(
-            "Cannot instantiate the base class AnyAgent, please use the factory method 'AnyAgent.create'"
+            "Cannot instantiate the base class MinionAgent, please use the factory method 'MinionAgent.create'"
         )
 
     @property
