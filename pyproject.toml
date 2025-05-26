@@ -9,7 +9,8 @@ dependencies = [
     "smolagents>=0.0.1",
     "python-dotenv>=1.0.0",
     "browser-use>=0.0.1",
-    "loguru>=0.0.1"
+    "loguru>=0.0.1",
+
 ]
 requires-python = ">=3.11"
 
@@ -64,6 +65,9 @@ deep-research = [
     "langchain-together>=0.3.0",
     "langchain>=0.3.23",
     "gradio>=5.25.0",
+]
+serve = [
+  "a2a-sdk>=0.2.5",
 ]
 all = [
   "minion-agent-x[google,smolagents,mcp,minion,deep-research]"
