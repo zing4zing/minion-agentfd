@@ -61,6 +61,7 @@ see example_browser_use.py
 see example_with_managed_agents.py
 see example_deep_research.py
 see example_reason.py
+see example_data_journalism.py
 
 ## Configuration
 
